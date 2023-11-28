@@ -1,11 +1,17 @@
 import { registerAs, ConfigModuleOptions } from '@nestjs/config';
 import * as Joi from 'joi';
+import { CommonConfigs, DatabaseConfigs, TelegrafConfigs } from '../types';
 
-const common = registerAs('common', () => ({
+const common = registerAs<CommonConfigs>('common', () => ({
   port: +process.env.PORT,
+  appUrl: process.env.APP_URL,
 }));
 
-const database = registerAs('db', () => ({
+const telegram = registerAs<TelegrafConfigs>('tg', () => ({
+  token: process.env.BOT_TOKEN,
+}));
+
+const database = registerAs<DatabaseConfigs>('db', () => ({
   type: process.env.DB_TYPE,
   host: process.env.DB_HOST,
   port: +process.env.DB_PORT,
@@ -19,6 +25,8 @@ export const EnvConfig: ConfigModuleOptions = {
   isGlobal: true,
   validationSchema: Joi.object({
     PORT: Joi.string().required(),
+    APP_URL: Joi.string().required(),
+    BOT_TOKEN: Joi.string().required(),
     DB_TYPE: Joi.string().required(),
     DB_HOST: Joi.string().required(),
     DB_PORT: Joi.number().required(),
@@ -26,5 +34,5 @@ export const EnvConfig: ConfigModuleOptions = {
     DB_PASSWORD: Joi.string().required(),
     DB_NAME: Joi.string().required(),
   }),
-  load: [common, database],
+  load: [common, database, telegram],
 };
