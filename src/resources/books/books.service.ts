@@ -64,9 +64,11 @@ export class BooksService {
       return null;
     }
 
-    await this.bookRepository.update(id, {
-      lastIndex: page,
-    });
+    if (page !== chunk.book.lastIndex) {
+      await this.bookRepository.update(id, {
+        lastIndex: page,
+      });
+    }
 
     return {
       text: chunk.text,
