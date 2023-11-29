@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Список книг</title>
+  </head>
+  <body>
+    <h2>Список книг</h2>
+    {{#each books}}
+      <div>
+        <p>{{ index }}. {{ title }} {{ author }} (id: {{ id }})</p>
+        <a href={{ link }}>Открыть</a>
+      </div>
+    {{/each}}
+  </body>
+</html>

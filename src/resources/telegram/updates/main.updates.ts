@@ -1,6 +1,6 @@
-import { On, Update } from 'nestjs-telegraf';
+import { Command, On, Update } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
-import { Document } from 'telegraf/typings/core/types/typegram';
+import { Document, Message } from 'telegraf/typings/core/types/typegram';
 import { getBufferFromUrl } from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +13,38 @@ export class MainUpdate {
     private readonly configService: ConfigService,
   ) {}
 
+  @Command('delete')
+  async deleteBook(ctx: Context) {
+    const message = ctx.message as Message.TextMessage;
+
+    if (message.text === '/delete') {
+      ctx.reply(
+        'Синтаксис команды: /delete <book-id>, где book-id: идентификатор книги.\nПример: /delete 1',
+      );
+
+      return;
+    }
+
+    const [, bookId] = message.text.split(' ');
+
+    const { result: isDelete, book } = await this.booksService.deleteBookById(
+      +bookId,
+    );
+
+    if (!isDelete) {
+      ctx.reply('Ошибка при удалении! Нужно смотреть в консоль');
+
+      return;
+    }
+
+    ctx.reply(
+      `Книга \`${book.title}\` автора \`${book.author}\` была удалена`,
+      {
+        parse_mode: 'Markdown',
+      },
+    );
+  }
+
   @On('document')
   async getBook(ctx: Context) {
     let processMessageId: number;
@@ -20,9 +52,12 @@ export class MainUpdate {
 
     const { file_name: fileName, file_id: fileId } = (ctx.message as any)
       .document as Document;
+    const author = ((ctx.message as any)?.caption as string) || 'noname';
 
     if (fileName.endsWith('.txt')) {
-      const messageReplyResult = await ctx.reply('Начинаю обработку...');
+      const messageReplyResult = await ctx.reply(
+        `Начинаю обработку...\n(Название книги: ${fileName}; Автор: ${author})`,
+      );
       processMessageId = messageReplyResult.message_id;
 
       try {
@@ -41,9 +76,9 @@ export class MainUpdate {
         const source = await getBufferFromUrl(fileUrl);
 
         const bookId = await this.booksService.createBook({
-          title: 'sample test',
+          title: fileName,
           bookText: source.toString(),
-          author: 'sample text author',
+          author,
         });
 
         const { appUrl } = this.configService.get<CommonConfigs>('common');
