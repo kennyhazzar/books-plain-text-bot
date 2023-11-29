@@ -17,11 +17,12 @@ export class BooksService {
   ) {}
 
   async createBook(payload: CreateBookDto): Promise<number> {
-    const chunks = splitEveryN(payload.bookText);
+    const { chunks, totalIndex } = splitEveryN(payload.bookText);
 
     const { raw } = await this.bookRepository.insert({
       author: payload?.author,
       title: payload.title,
+      totalIndex,
     });
 
     const insertedBookId = +raw[0]?.id;
@@ -43,9 +44,11 @@ export class BooksService {
     id: number,
     page: number,
   ): Promise<{
-    text: string | undefined;
-    title: string | undefined;
-    bookId: number | undefined;
+    text: string;
+    title: string;
+    bookId: number;
+    currentPage: number;
+    totalPage: number;
   } | null> {
     const chunk = await this.bookChunkRepository.findOne({
       where: {
@@ -61,10 +64,16 @@ export class BooksService {
       return null;
     }
 
+    await this.bookRepository.update(id, {
+      lastIndex: page,
+    });
+
     return {
       text: chunk.text,
       title: chunk.book.title,
       bookId: chunk.book.id,
+      currentPage: page,
+      totalPage: chunk.book.totalIndex,
     };
   }
 
@@ -73,7 +82,11 @@ export class BooksService {
 
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-    const books = await this.bookRepository.find();
+    const books = await this.bookRepository.find({
+      order: {
+        updatedAt: 'ASC',
+      },
+    });
 
     for (let index = 0; index < books.length; index++) {
       const book = books[index];
@@ -82,7 +95,10 @@ export class BooksService {
         index: index + 1,
         title: book.title,
         author: book.author,
-        link: `${appUrl}/r/${book.id}/1`,
+        begginLink: `${appUrl}/r/${book.id}/1`,
+        continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}`,
+        currentPage: book.lastIndex,
+        totalPage: book.totalIndex,
       });
     }
 

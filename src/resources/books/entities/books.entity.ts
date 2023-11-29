@@ -10,6 +10,12 @@ export class Book extends BaseEntity {
   @Column()
   author: string;
 
+  @Column({ default: 1 })
+  lastIndex: number;
+
+  @Column()
+  totalIndex: number;
+
   @OneToMany(() => BooksChunk, (chunk) => chunk.id)
   chunks: BooksChunk[];
 }
