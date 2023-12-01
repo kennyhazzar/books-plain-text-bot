@@ -1,4 +1,12 @@
-import { Controller, Get, Param, ParseIntPipe, Render } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  Render,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { BooksService } from './books.service';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs } from '@core/types';
@@ -10,12 +18,18 @@ export class BooksController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Get('all')
+  @Get()
   @Render('books')
-  async getAll() {
-    const books = await this.booksService.getAll();
+  async getAll(@Query('k') apiKey: string) {
+    if (!apiKey) {
+      throw new UnauthorizedException(
+        'query param "k" is required! use ?k=<key>',
+      );
+    }
 
-    return { books };
+    const { result: books, userName } = await this.booksService.getAll(apiKey);
+
+    return { books, userName };
   }
 
   @Get('r/:id/:page')
@@ -23,23 +37,34 @@ export class BooksController {
   async getBookPage(
     @Param('id', ParseIntPipe) bookId: number,
     @Param('page', ParseIntPipe) page: number,
+    @Query('k') apiKey: string,
   ) {
-    const chunk = await this.booksService.getPageByBookId(bookId, page);
+    if (!apiKey) {
+      throw new UnauthorizedException(
+        'query param "k" is required! use ?k=<key>',
+      );
+    }
+
+    const apiKeyParam = `?k=${apiKey}`;
+
+    const chunk = await this.booksService.getPageByBookId(bookId, page, apiKey);
 
     if (chunk) {
       const { appUrl } = this.configService.get<CommonConfigs>('common');
 
       return {
         ...chunk,
-        main: `${appUrl}/all`,
-        back: `${appUrl}/r/${chunk.bookId}/${page === 1 ? page : page - 1}`,
-        next: `${appUrl}/r/${chunk.bookId}/${page + 1}`,
+        main: `${appUrl}${apiKeyParam}`,
+        back: `${appUrl}/r/${chunk.bookId}/${
+          page === 1 ? page : page - 1
+        }${apiKeyParam}`,
+        next: `${appUrl}/r/${chunk.bookId}/${page + 1}${apiKeyParam}`,
       };
     } else {
       const { appUrl } = this.configService.get<CommonConfigs>('common');
 
       return {
-        main: `${appUrl}/all`,
+        main: `${appUrl}${apiKeyParam}`,
         title: 'Не найдено',
         text: 'Страница или книга не найдены!',
       };

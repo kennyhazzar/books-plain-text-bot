@@ -6,10 +6,13 @@ import { CreateBookDto, CreateBooksChunkDto } from './dto';
 import { splitEveryN } from '../../core/utils';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs } from '@core/types';
+import { UsersService } from '@resources/users/users.service';
+import { User } from '@resources/users/entities';
 
 @Injectable()
 export class BooksService {
   constructor(
+    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
     @InjectRepository(Book) private readonly bookRepository: Repository<Book>,
     @InjectRepository(BooksChunk)
@@ -23,6 +26,7 @@ export class BooksService {
       author: payload?.author,
       title: payload.title,
       totalIndex,
+      user: payload.user,
     });
 
     const insertedBookId = +raw[0]?.id;
@@ -43,6 +47,7 @@ export class BooksService {
   async getPageByBookId(
     id: number,
     page: number,
+    apiKey: string,
   ): Promise<{
     text: string;
     title: string;
@@ -54,10 +59,13 @@ export class BooksService {
       where: {
         book: {
           id,
+          user: {
+            apiKey,
+          },
         },
         index: page,
       },
-      relations: ['book'],
+      relations: ['book', 'book.user'],
     });
 
     if (!chunk) {
@@ -79,16 +87,30 @@ export class BooksService {
     };
   }
 
-  async getAll() {
+  async getAll(apiKey: string) {
     const result = [];
 
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
     const books = await this.bookRepository.find({
+      where: {
+        user: {
+          apiKey,
+        },
+      },
       order: {
         updatedAt: 'ASC',
       },
+      relations: ['user'],
     });
+
+    let user: User;
+
+    if (books.length > 0) {
+      user = books[0].user;
+    }
+
+    const apiKeyParam = `?k=${apiKey}`;
 
     for (let index = 0; index < books.length; index++) {
       const book = books[index];
@@ -97,23 +119,37 @@ export class BooksService {
         index: index + 1,
         title: book.title,
         author: book.author,
-        begginLink: `${appUrl}/r/${book.id}/1`,
-        continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}`,
+        begginLink: `${appUrl}/r/${book.id}/1${apiKeyParam}`,
+        continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
         currentPage: book.lastIndex,
         totalPage: book.totalIndex,
       });
     }
 
-    return result;
+    return {
+      result,
+      userName: user
+        ? `${
+            user.firstName && user.secondName && user.username
+              ? `пользователя ${user.firstName} ${user.secondName} (${user.username})`
+              : `${user.username}`
+          }`
+        : 'Ошибка авторизации',
+    };
   }
 
   async deleteBookById(
     id: number,
+    apiKey: string,
   ): Promise<{ book: Book | null; result: boolean }> {
     const book = await this.bookRepository.findOne({
       where: {
         id,
+        user: {
+          apiKey,
+        },
       },
+      relations: ['user'],
     });
 
     if (!book) {
@@ -124,14 +160,14 @@ export class BooksService {
     }
 
     try {
-      await this.bookRepository.delete({
-        id: book.id,
-      });
-
       await this.bookChunkRepository.delete({
         book: {
           id,
         },
+      });
+
+      await this.bookRepository.delete({
+        id: book.id,
       });
 
       return {

@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '@core/db';
 import { BooksChunk } from './books-chunk.entity';
+import { User } from '@resources/users/entities';
 
 @Entity()
 export class Book extends BaseEntity {
@@ -18,4 +19,8 @@ export class Book extends BaseEntity {
 
   @OneToMany(() => BooksChunk, (chunk) => chunk.id)
   chunks: BooksChunk[];
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn()
+  user: User;
 }

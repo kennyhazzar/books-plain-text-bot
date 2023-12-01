@@ -1,20 +1,44 @@
-import { Command, On, Update } from 'nestjs-telegraf';
-import { Context } from 'telegraf';
+import { Command, On, Update, Use } from 'nestjs-telegraf';
 import { Document, Message } from 'telegraf/typings/core/types/typegram';
 import { getBufferFromUrl } from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
-import { CommonConfigs } from '@core/types';
+import { CommonConfigs, MainUpdateContext } from '@core/types';
+import { UsersService } from '../../users/users.service';
+import { User } from '@resources/users/entities';
 
 @Update()
 export class MainUpdate {
   constructor(
     private readonly booksService: BooksService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
+  @Use()
+  async checkUserMiddleware(ctx: MainUpdateContext, next: () => Promise<void>) {
+    let user: User;
+
+    if (ctx) {
+      user = await this.checkUser(ctx);
+      ctx.state.user = user;
+      await next();
+
+      return;
+    }
+
+    await next();
+  }
+
+  @Command('link')
+  async getLink(ctx: MainUpdateContext) {
+    const { appUrl } = this.configService.get<CommonConfigs>('common');
+
+    ctx.reply(`Ссылка на список книг: ${appUrl}?k=${ctx.state.user.apiKey}`);
+  }
+
   @Command('delete')
-  async deleteBook(ctx: Context) {
+  async deleteBook(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
 
     if (message.text === '/delete') {
@@ -29,6 +53,7 @@ export class MainUpdate {
 
     const { result: isDelete, book } = await this.booksService.deleteBookById(
       +bookId,
+      ctx.state.user.apiKey,
     );
 
     if (!isDelete) {
@@ -46,7 +71,9 @@ export class MainUpdate {
   }
 
   @On('document')
-  async getBook(ctx: Context) {
+  async getBook(ctx: MainUpdateContext) {
+    const user = await this.checkUser(ctx);
+
     let processMessageId: number;
     let fileUrl = '';
 
@@ -79,13 +106,14 @@ export class MainUpdate {
           title: fileName,
           bookText: source.toString(),
           author,
+          user,
         });
 
         const { appUrl } = this.configService.get<CommonConfigs>('common');
 
         ctx.deleteMessage(processMessageId);
 
-        await ctx.reply(`\`${appUrl}/r/${bookId}/1\``, {
+        await ctx.reply(`\`${appUrl}/r/${bookId}/1?k=${user.apiKey}\``, {
           reply_to_message_id: ctx.message.message_id,
           parse_mode: 'Markdown',
         });
@@ -99,5 +127,38 @@ export class MainUpdate {
     } else {
       ctx.reply('Я жду .txt файл ващето');
     }
+  }
+
+  @On('text')
+  async onText(ctx: MainUpdateContext) {
+    ctx.reply(
+      `Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации`,
+    );
+  }
+
+  private async checkUser(ctx: MainUpdateContext): Promise<User | null> {
+    let user = await this.usersService.getByTelegramId(ctx.chat.id);
+
+    if (!user) {
+      user = await this.usersService.insert({
+        telegramId: ctx.chat.id,
+        username: ctx.from?.username,
+        firstName: ctx.from?.first_name,
+        secondName: ctx.from?.last_name,
+      });
+
+      ctx.reply(
+        `Вы зарегистрировались, ваш токен: \`${user.apiKey}\`. Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации`,
+        {
+          parse_mode: 'Markdown',
+        },
+      );
+    }
+
+    if (user.isBlocked) {
+      return;
+    }
+
+    return user;
   }
 }
