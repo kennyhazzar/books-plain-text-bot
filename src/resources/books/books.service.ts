@@ -99,7 +99,7 @@ export class BooksService {
         },
       },
       order: {
-        updatedAt: 'ASC',
+        updatedAt: 'DESC',
       },
       relations: ['user'],
     });
