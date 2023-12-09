@@ -79,6 +79,6 @@ export class ActionsUpdate {
       },
     });
 
-    await ctx.answerCbQuery(`${chunk.currentPage + 1} / ${chunk.totalPage}`);
+    await ctx.answerCbQuery(`${chunk.currentPage} / ${chunk.totalPage}`);
   }
 }
