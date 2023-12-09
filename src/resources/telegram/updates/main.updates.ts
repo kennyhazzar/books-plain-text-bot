@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { UsersService } from '../../users/users.service';
 import { User } from '@resources/users/entities';
+import { getReadBookKeyboard } from '../../../core/telegram';
 
 @Update()
 export class MainUpdate {
@@ -28,6 +29,52 @@ export class MainUpdate {
     }
 
     await next();
+  }
+
+  @Command('read')
+  async readBookInChat(ctx: MainUpdateContext) {
+    const message = ctx.message as Message.TextMessage;
+
+    if (message.text === '/read') {
+      ctx.reply(
+        'Синтаксис команды: /read <book-id>, где book-id: идентификатор книги (целое число).\nПример: /read 1\n\nЕсли книга найдена, вы получите текущую страницу и кнопки навигации',
+      );
+
+      return;
+    }
+
+    const [, bookId] = message.text.split(' ');
+
+    if (!Number.isNaN(+bookId)) {
+      const apiKey = ctx.state.user.apiKey;
+      const book = await this.booksService.getBookById(+bookId, apiKey);
+
+      if (!book) {
+        ctx.reply('Книга не была найдена!');
+
+        return;
+      }
+
+      const chunk = await this.booksService.getPageByBookId(
+        +bookId,
+        book.currentPage,
+        apiKey,
+      );
+
+      console.log(chunk);
+
+      ctx.reply(chunk.text, {
+        reply_markup: {
+          inline_keyboard: getReadBookKeyboard(
+            chunk.currentPage,
+            chunk.totalPage,
+            chunk.bookId,
+          ),
+        },
+      });
+    } else {
+      ctx.reply('Проверьте ваш айди. Кажется, он не является целым числом');
+    }
   }
 
   @Command('link')
@@ -132,7 +179,7 @@ export class MainUpdate {
   @On('text')
   async onText(ctx: MainUpdateContext) {
     ctx.reply(
-      `Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации`,
+      `Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации\n\nВы также можете читать книги в чате бота! Используйте команду /read для получения информации`,
     );
   }
 
@@ -148,7 +195,7 @@ export class MainUpdate {
       });
 
       ctx.reply(
-        `Вы зарегистрировались, ваш токен: \`${user.apiKey}\`. Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации`,
+        `Вы зарегистрировались, ваш токен: \`${user.apiKey}\`. Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации\n\nВы также можете читать книги в чате бота! Используйте команду /read для получения информации`,
         {
           parse_mode: 'Markdown',
         },

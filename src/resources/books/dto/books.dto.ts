@@ -12,3 +12,22 @@ export class CreateBooksChunkDto {
   text: string;
   index: number;
 }
+
+export class GetBookDto {
+  id: number;
+  index?: number;
+  title: string;
+  author: string;
+  begginLink: string;
+  continousLink: string;
+  currentPage: number;
+  totalPage: number;
+}
+
+export class GetChunkDto {
+  text: string;
+  title: string;
+  bookId: number;
+  currentPage: number;
+  totalPage: number;
+}

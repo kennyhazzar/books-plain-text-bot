@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book, BooksChunk } from './entities';
 import { Repository } from 'typeorm';
-import { CreateBookDto, CreateBooksChunkDto } from './dto';
+import {
+  CreateBookDto,
+  CreateBooksChunkDto,
+  GetBookDto,
+  GetChunkDto,
+} from './dto';
 import { splitEveryN } from '../../core/utils';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs } from '@core/types';
@@ -48,13 +53,7 @@ export class BooksService {
     id: number,
     page: number,
     apiKey: string,
-  ): Promise<{
-    text: string;
-    title: string;
-    bookId: number;
-    currentPage: number;
-    totalPage: number;
-  } | null> {
+  ): Promise<GetChunkDto | null> {
     const chunk = await this.bookChunkRepository.findOne({
       where: {
         book: {
@@ -87,8 +86,10 @@ export class BooksService {
     };
   }
 
-  async getAll(apiKey: string) {
-    const result = [];
+  async getAll(
+    apiKey: string,
+  ): Promise<{ result: GetBookDto[]; userName: string }> {
+    const result: GetBookDto[] = [];
 
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
@@ -136,6 +137,32 @@ export class BooksService {
           }`
         : 'Ошибка авторизации',
     };
+  }
+
+  async getBookById(id: number, apiKey: string): Promise<GetBookDto> {
+    const book = await this.bookRepository.findOne({
+      where: {
+        id,
+        user: {
+          apiKey,
+        },
+      },
+    });
+
+    if (book) {
+      const { appUrl } = this.configService.get<CommonConfigs>('common');
+      const apiKeyParam = `?k=${apiKey}`;
+
+      return {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        begginLink: `${appUrl}/r/${book.id}/1${apiKeyParam}`,
+        continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
+        currentPage: book.lastIndex,
+        totalPage: book.totalIndex,
+      };
+    }
   }
 
   async deleteBookById(
