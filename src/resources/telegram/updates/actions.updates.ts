@@ -71,7 +71,7 @@ export class ActionsUpdate {
           chunk.currentPage,
           chunk.totalPage,
           chunk.bookId,
-          `${appUrl}/r/${chunk.bookId}/${chunk.currentPage}`,
+          `${appUrl}/r/${chunk.bookId}/${chunk.currentPage}?k=${ctx.state.user.apiKey}`,
         ),
       },
     });
