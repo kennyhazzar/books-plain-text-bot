@@ -65,7 +65,7 @@ export class ActionsUpdate {
   private async updateMessage(ctx: MainUpdateContext, chunk: GetChunkDto) {
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-    ctx.editMessageText(chunk.text, {
+    await ctx.editMessageText(chunk.text, {
       reply_markup: {
         inline_keyboard: getReadBookKeyboard(
           chunk.currentPage,
@@ -75,5 +75,7 @@ export class ActionsUpdate {
         ),
       },
     });
+
+    await ctx.answerCbQuery(`${chunk.currentPage + 1} / ${chunk.totalPage}`);
   }
 }
