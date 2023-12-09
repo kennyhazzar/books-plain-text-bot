@@ -61,8 +61,6 @@ export class MainUpdate {
         apiKey,
       );
 
-      console.log(chunk);
-
       ctx.reply(chunk.text, {
         reply_markup: {
           inline_keyboard: getReadBookKeyboard(
