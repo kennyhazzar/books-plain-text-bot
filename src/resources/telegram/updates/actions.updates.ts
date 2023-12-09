@@ -8,7 +8,10 @@ import { ConfigService } from '@nestjs/config';
 
 @Update()
 export class ActionsUpdate {
-  constructor(private readonly booksService: BooksService, private readonly configService: ConfigService) {}
+  constructor(
+    private readonly booksService: BooksService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Action(/back_+/)
   async getBackPage(ctx: MainUpdateContext) {
