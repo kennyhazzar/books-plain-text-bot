@@ -5,6 +5,7 @@ export const getReadBookKeyboard = (
   currentPage: number,
   totalPage: number,
   bookId: number,
+  url: string,
 ): InlineKeyboardButton[][] => [
   [
     {
@@ -13,8 +14,7 @@ export const getReadBookKeyboard = (
     },
     {
       text: `${currentPage} / ${totalPage}`,
-      // url: book.continousLink,
-      url: 'vk.com',
+      url,
     },
     {
       text: '>',

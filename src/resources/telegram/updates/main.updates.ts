@@ -67,6 +67,7 @@ export class MainUpdate {
             chunk.currentPage,
             chunk.totalPage,
             chunk.bookId,
+            book.continousLink,
           ),
         },
       });

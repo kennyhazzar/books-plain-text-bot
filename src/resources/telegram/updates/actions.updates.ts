@@ -1,13 +1,14 @@
 import { Action, Update } from 'nestjs-telegraf';
 import { Update as TelegrafUpdate } from 'telegraf/typings/core/types/typegram';
 import { BooksService } from '@resources/books/books.service';
-import { MainUpdateContext } from '@core/types';
+import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { GetChunkDto } from '../../books/dto';
 import { getReadBookKeyboard } from '../../../core/telegram';
+import { ConfigService } from '@nestjs/config';
 
 @Update()
 export class ActionsUpdate {
-  constructor(private readonly booksService: BooksService) {}
+  constructor(private readonly booksService: BooksService, private readonly configService: ConfigService) {}
 
   @Action(/back_+/)
   async getBackPage(ctx: MainUpdateContext) {
@@ -62,12 +63,15 @@ export class ActionsUpdate {
   }
 
   private async updateMessage(ctx: MainUpdateContext, chunk: GetChunkDto) {
+    const { appUrl } = this.configService.get<CommonConfigs>('common');
+
     ctx.editMessageText(chunk.text, {
       reply_markup: {
         inline_keyboard: getReadBookKeyboard(
           chunk.currentPage,
           chunk.totalPage,
           chunk.bookId,
+          `${appUrl}/r/${chunk.bookId}/${chunk.currentPage}`,
         ),
       },
     });
