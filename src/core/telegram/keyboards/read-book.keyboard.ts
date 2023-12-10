@@ -47,7 +47,5 @@ export const getReadBookKeyboard = (
     );
   }
 
-  console.log(keyboard);
-
   return keyboard;
 };
