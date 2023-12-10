@@ -30,7 +30,7 @@ export class BooksService {
     const { raw } = await this.bookRepository.insert({
       author: payload?.author,
       title: payload.title,
-      totalIndex,
+      totalIndex: totalIndex - 1,
       user: payload.user,
     });
 

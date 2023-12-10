@@ -9,7 +9,7 @@ export class DatabaseConfigs {
   port: number;
   username: string;
   password: string;
-  name: string;
+  database: string;
 }
 
 export class TelegrafConfigs {

@@ -5,7 +5,7 @@ import { CommonConfigs } from '@core/types';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
-async function bootstrap() {
+(async () => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
@@ -16,5 +16,4 @@ async function bootstrap() {
   await app.listen(port, async () =>
     console.log(`app was running on ${await app.getUrl()}`),
   );
-}
-bootstrap();
+})();

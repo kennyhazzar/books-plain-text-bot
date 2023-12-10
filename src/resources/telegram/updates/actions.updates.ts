@@ -5,6 +5,7 @@ import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { GetChunkDto } from '../../books/dto';
 import { getReadBookKeyboard } from '../../../core/telegram';
 import { ConfigService } from '@nestjs/config';
+import { Actions } from '@core/telegram/actions';
 
 @Update()
 export class ActionsUpdate {
@@ -12,6 +13,11 @@ export class ActionsUpdate {
     private readonly booksService: BooksService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Action(Actions.CLOSE_BOOK)
+  async closeBook(ctx: MainUpdateContext) {
+    ctx.deleteMessage();
+  }
 
   @Action(/back_+/)
   async getBackPage(ctx: MainUpdateContext) {
