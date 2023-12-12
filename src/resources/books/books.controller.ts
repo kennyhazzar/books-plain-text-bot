@@ -1,5 +1,6 @@
 import {
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
@@ -20,16 +21,23 @@ export class BooksController {
 
   @Get()
   @Render('books')
-  async getAll(@Query('k') apiKey: string) {
+  async getAll(
+    @Query('k') apiKey: string,
+    @Query('p', new DefaultValuePipe(1)) page: number,
+  ) {
     if (!apiKey) {
       throw new UnauthorizedException(
         'query param "k" is required! use ?k=<key>',
       );
     }
 
-    const { result: books, userName } = await this.booksService.getAll(apiKey);
+    const {
+      result: books,
+      userName,
+      pageLinks,
+    } = await this.booksService.getAll(apiKey, page);
 
-    return { books, userName };
+    return { books, userName, pageLinks };
   }
 
   @Get('r/:id/:page')

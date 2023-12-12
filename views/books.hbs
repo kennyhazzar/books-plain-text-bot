@@ -13,5 +13,6 @@
         <a href={{ continousLink }}>Продолжить чтение</a>
       </div>
     {{/each}}
+    <div><p>Страницы: </p>{{#each pageLinks}}<p><a href={{ url }}>{{index}}</a></p>{{/each}}</div>
   </body>
 </html>

@@ -8,9 +8,9 @@ import {
   GetBookDto,
   GetChunkDto,
 } from './dto';
-import { splitEveryN } from '../../core/utils';
+import { getPagesCount, splitEveryN } from '@core/utils';
 import { ConfigService } from '@nestjs/config';
-import { CommonConfigs } from '@core/types';
+import { CommonConfigs, Page } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { User } from '@resources/users/entities';
 
@@ -89,14 +89,20 @@ export class BooksService {
 
   async getAll(
     apiKey: string,
-    take = 5,
     page = 1,
-  ): Promise<{ result: GetBookDto[]; userName: string }> {
+    take = 5,
+  ): Promise<{
+    result: GetBookDto[];
+    userName: string;
+    pageLinks: Array<Page>;
+  }> {
     const result: GetBookDto[] = [];
 
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-    const books = await this.bookRepository.find({
+    const skip = (page - 1) * take;
+
+    const [books, booksCount] = await this.bookRepository.findAndCount({
       where: {
         user: {
           apiKey,
@@ -107,7 +113,7 @@ export class BooksService {
       },
       relations: ['user'],
       take,
-      skip: (page - 1) * take,
+      skip,
     });
 
     let user: User;
@@ -122,7 +128,7 @@ export class BooksService {
       const book = books[index];
       result.push({
         id: book.id,
-        index: index + 1,
+        index: index + skip + 1,
         title: book.title,
         author: book.author,
         begginLink: `${appUrl}/r/${book.id}/1${apiKeyParam}`,
@@ -141,6 +147,7 @@ export class BooksService {
               : `${user.username}`
           }`
         : 'Ошибка авторизации',
+      pageLinks: getPagesCount(booksCount, take, `${appUrl}${apiKeyParam}`),
     };
   }
 
