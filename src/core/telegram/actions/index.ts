@@ -1,5 +1,4 @@
 export enum Actions {
-  BACK = 'back_',
-  NEXT = 'next_',
+  PAGE = 'page_',
   CLOSE_BOOK = 'close_book',
 }

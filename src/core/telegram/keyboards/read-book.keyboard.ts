@@ -4,12 +4,12 @@ import { Actions } from '../actions';
 const getNavigationInlineButton = (
   bookId: number,
   currentPage: number,
-  action: Actions,
+  action: 'prev' | 'next',
 ): InlineKeyboardButton => {
   return {
-    text: action === Actions.BACK ? '<' : '>',
-    callback_data: `${action}${bookId}_${
-      action === Actions.BACK ? currentPage - 1 : currentPage + 1
+    text: action === 'prev' ? '<' : '>',
+    callback_data: `${Actions.PAGE}${bookId}_${
+      action === 'prev' ? currentPage - 1 : currentPage + 1
     }`,
   };
 };
@@ -36,15 +36,11 @@ export const getReadBookKeyboard = (
   ];
 
   if (currentPage !== 1) {
-    keyboard[0].unshift(
-      getNavigationInlineButton(bookId, currentPage, Actions.BACK),
-    );
+    keyboard[0].unshift(getNavigationInlineButton(bookId, currentPage, 'prev'));
   }
 
   if (currentPage !== totalPage) {
-    keyboard[0].push(
-      getNavigationInlineButton(bookId, currentPage, Actions.NEXT),
-    );
+    keyboard[0].push(getNavigationInlineButton(bookId, currentPage, 'next'));
   }
 
   return keyboard;
