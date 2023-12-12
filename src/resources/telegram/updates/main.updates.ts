@@ -1,12 +1,16 @@
 import { Command, On, Update, Use } from 'nestjs-telegraf';
-import { Document, Message } from 'telegraf/typings/core/types/typegram';
+import {
+  Document,
+  InlineKeyboardButton,
+  Message,
+} from 'telegraf/typings/core/types/typegram';
 import { formatBytes, getBufferFromUrl } from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { UsersService } from '../../users/users.service';
 import { User } from '@resources/users/entities';
-import { getReadBookKeyboard } from '../../../core/telegram';
+import { getReadBookKeyboard, Actions } from '@core/telegram';
 
 @Update()
 export class MainUpdate {
@@ -29,6 +33,67 @@ export class MainUpdate {
     }
 
     await next();
+  }
+
+  @Command('search')
+  async searchByText(ctx: MainUpdateContext) {
+    const message = ctx.message as Message.TextMessage;
+
+    if (message.text === '/search') {
+      ctx.reply(
+        'Синтаксис команды: /search <book-id> <text>, где book-id: идентификатор книги (целое число), а text - поисковой текстовый запрос. \nПример /search 7 действительности.\nДанный поиск работает только при полном вхождении.',
+      );
+
+      return;
+    }
+
+    const [, bookId, text] = message.text.split(' ');
+
+    if (!Number.isNaN(+bookId)) {
+      const apiKey = ctx.state.user.apiKey;
+      const book = await this.booksService.getBookById(+bookId, apiKey);
+
+      if (!book) {
+        ctx.reply('Книга не была найдена!');
+
+        return;
+      }
+
+      const [searchResult, searchResultCount] = await this.booksService.search(
+        text,
+        +bookId,
+        apiKey,
+      );
+
+      if (!searchResult) {
+        ctx.reply('По вашему запросу ничего не найдено!');
+
+        return;
+      }
+
+      const keyboard: InlineKeyboardButton[][] = [
+        ...searchResult.map(({ index }) => [
+          {
+            text: `Страница ${index}`,
+            callback_data: `demo_page_${bookId}_${index}`,
+          },
+        ]),
+        [
+          {
+            text: 'Закрыть',
+            callback_data: Actions.CLOSE_BOOK,
+          },
+        ],
+      ];
+
+      ctx.reply(`Всего найдено вхождений: ${searchResultCount}`, {
+        reply_markup: {
+          inline_keyboard: keyboard,
+        },
+      });
+    } else {
+      ctx.reply('Проверьте айди. Кажется, он не является целым числом');
+    }
   }
 
   @Command('read')

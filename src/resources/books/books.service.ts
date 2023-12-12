@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book, BooksChunk } from './entities';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import {
   CreateBookDto,
   CreateBooksChunkDto,
@@ -231,6 +231,30 @@ export class BooksService {
         },
       },
       relations: ['user'],
+    });
+  }
+
+  async search(
+    text: string,
+    bookId: number,
+    apiKey: string,
+    page = 1,
+    take = 5,
+  ): Promise<[Array<BooksChunk>, number]> {
+    const skip = (page - 1) * take;
+    return await this.bookChunkRepository.findAndCount({
+      where: {
+        text: Like(`%${text}%`),
+        book: {
+          id: bookId,
+          user: {
+            apiKey,
+          },
+        },
+      },
+      take,
+      skip,
+      relations: ['book', 'book.user'],
     });
   }
 }

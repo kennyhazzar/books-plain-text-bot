@@ -14,6 +14,48 @@ export class ActionsUpdate {
     private readonly configService: ConfigService,
   ) {}
 
+  @Action(/demo_page_+/)
+  async getDemoPage(ctx: MainUpdateContext) {
+    const { callback_query: callbackQuery } =
+      ctx.update as TelegrafUpdate.CallbackQueryUpdate;
+
+    const [, , bookId, page] = (callbackQuery as any).data.split('_');
+
+    const chunk = await this.booksService.getPageByBookId(
+      +bookId,
+      +page,
+      ctx.state.user.apiKey,
+      false,
+    );
+
+    if (!chunk) {
+      ctx.answerCbQuery('Ошибка! Этой страницы или книги не существует!', {
+        show_alert: true,
+      });
+
+      return;
+    }
+
+    ctx.reply(chunk.text, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Открыть в книге',
+              callback_data: `${Actions.PAGE}${bookId}_${page}`,
+            },
+            {
+              text: 'Закрыть',
+              callback_data: Actions.CLOSE_BOOK,
+            },
+          ],
+        ],
+      },
+    });
+
+    ctx.answerCbQuery(`${page} / ${chunk.totalPage}`);
+  }
+
   @Action(Actions.CLOSE_BOOK)
   async closeBook(ctx: MainUpdateContext) {
     ctx.deleteMessage();
