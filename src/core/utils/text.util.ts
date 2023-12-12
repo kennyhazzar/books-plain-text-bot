@@ -13,58 +13,16 @@ export function splitEveryN(str: string, n = 4096): SplitResult {
   return { chunks, totalIndex: chunkIndex };
 }
 
-export function translitText(text: string) {
-  return text.replace(
-    /([а-яё])|([\s_-])|([^a-z\d])/gi,
-    function (all, ch, space, words, i) {
-      if (space || words) {
-        return space ? '-' : '';
-      }
-      const code = ch.charCodeAt(0),
-        index =
-          code == 1025 || code == 1105
-            ? 0
-            : code > 1071
-            ? code - 1071
-            : code - 1039,
-        t = [
-          'yo',
-          'a',
-          'b',
-          'v',
-          'g',
-          'd',
-          'e',
-          'zh',
-          'z',
-          'i',
-          'y',
-          'k',
-          'l',
-          'm',
-          'n',
-          'o',
-          'p',
-          'r',
-          's',
-          't',
-          'u',
-          'f',
-          'h',
-          'c',
-          'ch',
-          'sh',
-          'shch',
-          '',
-          'y',
-          '',
-          'e',
-          'yu',
-          'ya',
-        ];
-      return t[index];
-    },
-  );
+export function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
 export const generateId = (

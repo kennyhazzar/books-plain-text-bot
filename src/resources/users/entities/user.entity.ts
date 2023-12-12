@@ -23,6 +23,12 @@ export class User extends BaseEntity {
   @Column()
   apiKey: string;
 
+  @Column({ default: 5 })
+  booksLimit: number;
+
+  @Column({ default: 10485760, type: 'bigint' })
+  fileSizeLimit: number;
+
   @JoinColumn()
   @OneToMany(() => Book, (book) => book.id)
   books: Book[];

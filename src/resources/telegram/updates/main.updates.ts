@@ -1,6 +1,6 @@
 import { Command, On, Update, Use } from 'nestjs-telegraf';
 import { Document, Message } from 'telegraf/typings/core/types/typegram';
-import { getBufferFromUrl } from '@core/utils';
+import { formatBytes, getBufferFromUrl } from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
@@ -118,14 +118,41 @@ export class MainUpdate {
 
   @On('document')
   async getBook(ctx: MainUpdateContext) {
-    const user = await this.checkUser(ctx);
+    const user = ctx.state.user;
 
     let processMessageId: number;
     let fileUrl = '';
 
-    const { file_name: fileName, file_id: fileId } = (ctx.message as any)
-      .document as Document;
+    const {
+      file_name: fileName,
+      file_id: fileId,
+      file_size: fileSize,
+    } = (ctx.message as any).document as Document;
     const author = ((ctx.message as any)?.caption as string) || 'noname';
+
+    if (fileSize > user.fileSizeLimit) {
+      ctx.reply(
+        `Файл слишком велик. Ваш лимит: ${formatBytes(
+          user.fileSizeLimit,
+        )}; Размер файла: ${formatBytes(
+          fileSize,
+        )}\nЧтобы увеличить лимит, напишите разработчику: @kennyhazzar`,
+      );
+
+      return;
+    }
+
+    const booksCount = await this.booksService.getBooksCountByTelegramId(
+      user.telegramId,
+    );
+
+    if (user.booksLimit <= booksCount) {
+      ctx.reply(
+        'Вы достигли максимума книг на ваш аккаунт! Чтобы увеличить лимит, напишите разработчику: @kennyhazzar',
+      );
+
+      return;
+    }
 
     if (fileName.endsWith('.txt')) {
       const messageReplyResult = await ctx.reply(

@@ -53,6 +53,7 @@ export class BooksService {
     id: number,
     page: number,
     apiKey: string,
+    saveCurrentPage = true,
   ): Promise<GetChunkDto | null> {
     const chunk = await this.bookChunkRepository.findOne({
       where: {
@@ -71,7 +72,7 @@ export class BooksService {
       return null;
     }
 
-    if (page !== chunk.book.lastIndex) {
+    if (page !== chunk.book.lastIndex && saveCurrentPage) {
       await this.bookRepository.update(id, {
         lastIndex: page,
       });
@@ -88,6 +89,8 @@ export class BooksService {
 
   async getAll(
     apiKey: string,
+    take = 5,
+    page = 1,
   ): Promise<{ result: GetBookDto[]; userName: string }> {
     const result: GetBookDto[] = [];
 
@@ -103,6 +106,8 @@ export class BooksService {
         updatedAt: 'DESC',
       },
       relations: ['user'],
+      take,
+      skip: (page - 1) * take,
     });
 
     let user: User;
@@ -209,5 +214,16 @@ export class BooksService {
         result: false,
       };
     }
+  }
+
+  async getBooksCountByTelegramId(telegramId: number) {
+    return this.bookRepository.count({
+      where: {
+        user: {
+          telegramId,
+        },
+      },
+      relations: ['user'],
+    });
   }
 }
