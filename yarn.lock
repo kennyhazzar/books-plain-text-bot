@@ -387,6 +387,11 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.53.0.tgz#bea56f2ed2b5baea164348ff4d5a879f6f81f20d"
   integrity sha512-Kn7K8dx/5U6+cT1yEhpX1w4PCSg0M+XyRILPgvwcEBjerFWCwQj5sbr3/VmxqV0JGHCBCzyd6LxypEuehypY1w==
 
+"@gboutte/nestjs-hbs@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@gboutte/nestjs-hbs/-/nestjs-hbs-0.0.15.tgz#73111ff254bb73dfbe04176e18856036b238635b"
+  integrity sha512-FaGUOHCCj8S1bLCKRf1hxEQ164K14zPDgL0TrcxsuQRlgOsDxyG9aZw84Sd6j+czjZ0evQwvwpPliuob6Mny4Q==
+
 "@hapi/hoek@^9.0.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"

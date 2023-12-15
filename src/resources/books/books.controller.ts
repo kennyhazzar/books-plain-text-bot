@@ -10,7 +10,6 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Render,
   UnauthorizedException,
   UploadedFile,
   UseInterceptors,
@@ -20,6 +19,7 @@ import { ConfigService } from '@nestjs/config';
 import { CommonConfigs } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { HandlebarsService } from '@gboutte/nestjs-hbs';
 
 @Controller()
 export class BooksController {
@@ -27,10 +27,10 @@ export class BooksController {
     private readonly userService: UsersService,
     private readonly booksService: BooksService,
     private readonly configService: ConfigService,
+    private readonly hbsService: HandlebarsService,
   ) {}
 
   @Get()
-  @Render('books')
   async getAll(
     @Query('k') apiKey: string,
     @Query('p', new DefaultValuePipe(1)) page: number,
@@ -47,11 +47,14 @@ export class BooksController {
       pageLinks,
     } = await this.booksService.getAll(apiKey, page);
 
-    return { books, userName, pageLinks };
+    return this.hbsService.renderFile('books.hbs', {
+      books,
+      userName,
+      pageLinks,
+    });
   }
 
   @Get('r/:id/:page')
-  @Render('page')
   async getBookPage(
     @Param('id', ParseIntPipe) bookId: number,
     @Param('page', ParseIntPipe) page: number,
@@ -70,22 +73,22 @@ export class BooksController {
     if (chunk) {
       const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-      return {
+      return this.hbsService.renderFile('page.hbs', {
         ...chunk,
         main: `${appUrl}${apiKeyParam}`,
         back: `${appUrl}/r/${chunk.bookId}/${
           page === 1 ? page : page - 1
         }${apiKeyParam}`,
         next: `${appUrl}/r/${chunk.bookId}/${page + 1}${apiKeyParam}`,
-      };
+      });
     } else {
       const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-      return {
+      return this.hbsService.renderFile('page.hbs', {
         main: `${appUrl}${apiKeyParam}`,
         title: 'Не найдено',
         text: 'Страница или книга не найдены!',
-      };
+      });
     }
   }
 
