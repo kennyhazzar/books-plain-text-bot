@@ -1,3 +1,5 @@
+import { BooksChunk } from '@resources/books/entities';
+
 type Chunk = { chunk: string; index: number };
 type SplitResult = { chunks: Array<Chunk>; totalIndex: number };
 
@@ -36,4 +38,8 @@ export const generateId = (
     token[i] = a[instance];
   }
   return token.join('');
+};
+
+export const joinBookText = (chunks: Array<BooksChunk>) => {
+  return chunks.map(({ text }) => text).join();
 };

@@ -22,6 +22,7 @@ export class GetBookDto {
   continousLink: string;
   currentPage: number;
   totalPage: number;
+  fileName?: string;
 }
 
 export class GetChunkDto {

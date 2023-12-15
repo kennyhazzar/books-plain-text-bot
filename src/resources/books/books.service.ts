@@ -24,6 +24,23 @@ export class BooksService {
     private readonly bookChunkRepository: Repository<BooksChunk>,
   ) {}
 
+  async getAllChunksByBookId(
+    id: number,
+    apiKey: string,
+  ): Promise<BooksChunk[]> {
+    return this.bookChunkRepository.find({
+      where: {
+        book: {
+          id,
+          user: {
+            apiKey,
+          },
+        },
+      },
+      relations: ['book', 'book.user'],
+    });
+  }
+
   async createBook(payload: CreateBookDto): Promise<number> {
     const { chunks, totalIndex } = splitEveryN(payload.bookText);
 
@@ -173,6 +190,7 @@ export class BooksService {
         continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
         currentPage: book.lastIndex,
         totalPage: book.totalIndex,
+        fileName: book.title,
       };
     }
   }

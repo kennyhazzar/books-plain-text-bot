@@ -4,7 +4,7 @@ import {
   InlineKeyboardButton,
   Message,
 } from 'telegraf/typings/core/types/typegram';
-import { formatBytes, getBufferFromUrl } from '@core/utils';
+import { formatBytes, getBufferFromUrl, joinBookText } from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
@@ -138,6 +138,42 @@ export class MainUpdate {
       });
     } else {
       ctx.reply('Проверьте ваш айди. Кажется, он не является целым числом');
+    }
+  }
+
+  @Command('download')
+  async downloadBook(ctx: MainUpdateContext) {
+    const message = ctx.message as Message.TextMessage;
+    const apiKey = ctx.state.user.apiKey;
+
+    if (message.text === '/download') {
+      ctx.reply(
+        'Синтаксис команды: /download <book-id>, где book-id: идентификатор книги.\nПример: /download 1',
+      );
+
+      return;
+    }
+
+    const [, bookId] = message.text.split(' ');
+
+    const book = await this.booksService.getBookById(+bookId, apiKey);
+
+    if (book) {
+      const chunks = await this.booksService.getAllChunksByBookId(
+        +bookId,
+        apiKey,
+      );
+
+      const source = Buffer.from(joinBookText(chunks), 'utf-8');
+
+      await ctx.sendDocument(
+        { source, filename: book.fileName },
+        {
+          caption: book.fileName,
+        },
+      );
+    } else {
+      ctx.reply('Книга не найдена');
     }
   }
 
