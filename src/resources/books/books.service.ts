@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book, BooksChunk } from './entities';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import {
   CreateBookDto,
   CreateBooksChunkDto,
@@ -262,7 +262,7 @@ export class BooksService {
     const skip = (page - 1) * take;
     return await this.bookChunkRepository.findAndCount({
       where: {
-        text: Like(`%${text}%`),
+        text: ILike(`%${text.toLowerCase()}%`),
         book: {
           id: bookId,
           user: {
