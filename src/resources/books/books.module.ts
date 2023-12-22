@@ -5,7 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book, BooksChunk } from './entities';
 import { UsersModule } from '../users/users.module';
 import { HandlebarsModule } from '@gboutte/nestjs-hbs';
+import { CacheModule } from '@nestjs/cache-manager';
 import Handlebars from 'handlebars';
+import { CacheConfig } from '@core/configs';
+import { RedisClientOptions } from 'redis';
 
 @Module({
   imports: [
@@ -22,6 +25,7 @@ import Handlebars from 'handlebars';
       ],
     }),
     TypeOrmModule.forFeature([Book, BooksChunk]),
+    CacheModule.registerAsync<RedisClientOptions>(CacheConfig),
     UsersModule,
   ],
   controllers: [BooksController],

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book, BooksChunk } from './entities';
 import { ILike, Repository } from 'typeorm';
@@ -13,6 +13,8 @@ import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, Page } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { User } from '@resources/users/entities';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class BooksService {
@@ -22,6 +24,7 @@ export class BooksService {
     @InjectRepository(Book) private readonly bookRepository: Repository<Book>,
     @InjectRepository(BooksChunk)
     private readonly bookChunkRepository: Repository<BooksChunk>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getAllChunksByBookId(
@@ -72,18 +75,28 @@ export class BooksService {
     apiKey: string,
     saveCurrentPage = true,
   ): Promise<GetChunkDto | null> {
-    const chunk = await this.bookChunkRepository.findOne({
-      where: {
-        book: {
-          id,
-          user: {
-            apiKey,
+    const cacheKey = `page_${id}_${page}`;
+
+    let chunk = await this.cacheManager.get<BooksChunk>(cacheKey);
+
+    if (!chunk) {
+      chunk = await this.bookChunkRepository.findOne({
+        where: {
+          book: {
+            id,
+            user: {
+              apiKey,
+            },
           },
+          index: page,
         },
-        index: page,
-      },
-      relations: ['book', 'book.user'],
-    });
+        relations: ['book', 'book.user'],
+      });
+
+      if (chunk) {
+        this.cacheManager.set(cacheKey, chunk, 3600);
+      }
+    }
 
     if (!chunk) {
       return null;
@@ -93,6 +106,18 @@ export class BooksService {
       await this.bookRepository.update(id, {
         lastIndex: page,
       });
+    }
+
+    const nextPageCacheKey = `page_${id}_${page + 1}`;
+
+    let nextPage = await this.cacheManager.get<BooksChunk>(nextPageCacheKey);
+
+    if (!nextPage) {
+      nextPage = await this.getChunk(id, page + 1, apiKey);
+
+      if (nextPage) {
+        this.cacheManager.set(nextPageCacheKey, nextPage);
+      }
     }
 
     return {
@@ -272,6 +297,21 @@ export class BooksService {
       },
       take,
       skip,
+      relations: ['book', 'book.user'],
+    });
+  }
+
+  private async getChunk(id: number, page: number, apiKey: string) {
+    return await this.bookChunkRepository.findOne({
+      where: {
+        book: {
+          id,
+          user: {
+            apiKey,
+          },
+        },
+        index: page,
+      },
       relations: ['book', 'book.user'],
     });
   }

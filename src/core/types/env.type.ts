@@ -15,3 +15,8 @@ export class DatabaseConfigs {
 export class TelegrafConfigs {
   token: string;
 }
+
+export class RedisConfigs {
+  host: string;
+  port: number;
+}
