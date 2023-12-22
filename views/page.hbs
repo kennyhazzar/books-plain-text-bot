@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>{{ title }}</title>
   </head>
-  <body>
+  <body class="dark-mode">
     <a href={{ main }}>меню</a>
     <a href={{ back }}>назад</a>
     <a href={{ next }}>след</a>
@@ -13,4 +13,18 @@
     <a href={{ back }}>назад</a>
     <a href={{ next }}>след</a>
   </body>
+
+  <style type="text/css">
+    body {
+    padding: 25px;
+    background-color: white;
+    color: black;
+    font-size: 25px;
+    }
+
+    .dark-mode {
+      background-color: black;
+      color: white;
+    }
+  </style>
 </html>

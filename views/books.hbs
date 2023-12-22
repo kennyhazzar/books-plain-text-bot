@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Список книг</title>
   </head>
-  <body>
+  <body class="dark-mode">
     <h2>Список книг {{ userName }}</h2>
     {{#each books}}
       <div>
@@ -15,4 +15,18 @@
     {{/each}}
     <div><p>Страницы: </p>{{#each pageLinks}}<p><a href={{ url }}>{{index}}</a></p>{{/each}}</div>
   </body>
+
+  <style type="text/css">
+    body {
+    padding: 25px;
+    background-color: white;
+    color: black;
+    font-size: 25px;
+    }
+
+    .dark-mode {
+      background-color: black;
+      color: white;
+    }
+  </style>
 </html>
