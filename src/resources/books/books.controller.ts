@@ -75,6 +75,9 @@ export class BooksController {
 
       return this.hbsService.renderFile('page.hbs', {
         ...chunk,
+        percent: `( ${Math.round(
+          (100 * chunk.currentPage) / chunk.totalPage,
+        )} % )`,
         main: `${appUrl}${apiKeyParam}`,
         back: `${appUrl}/r/${chunk.bookId}/${
           page === 1 ? page : page - 1

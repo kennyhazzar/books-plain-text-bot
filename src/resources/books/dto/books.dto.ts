@@ -23,6 +23,7 @@ export class GetBookDto {
   currentPage: number;
   totalPage: number;
   fileName?: string;
+  percent?: string;
 }
 
 export class GetChunkDto {

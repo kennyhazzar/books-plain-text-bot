@@ -17,13 +17,14 @@ const getNavigationInlineButton = (
 export const getReadBookKeyboard = (
   currentPage: number,
   totalPage: number,
+  percent: string,
   bookId: number,
   url: string,
 ): InlineKeyboardButton[][] => {
   const keyboard: InlineKeyboardButton[][] = [
     [
       {
-        text: `${currentPage} / ${totalPage}`,
+        text: `${currentPage} / ${totalPage} ${percent}`,
         url,
       },
     ],

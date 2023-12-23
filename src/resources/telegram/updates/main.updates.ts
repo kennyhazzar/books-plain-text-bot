@@ -131,6 +131,7 @@ export class MainUpdate {
           inline_keyboard: getReadBookKeyboard(
             chunk.currentPage,
             chunk.totalPage,
+            `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
             chunk.bookId,
             book.continousLink,
           ),

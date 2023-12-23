@@ -8,7 +8,7 @@
     <h2>Список книг {{ userName }}</h2>
     {{#each books}}
       <div>
-        <p>{{ index }}. {{ title }} {{ author }}; {{ currentPage }} из {{ totalPage }} (id: {{ id }})</p>
+        <p>{{ index }}. {{ title }} {{ author }}; {{ currentPage }} из {{ totalPage }} или {{ percent }} (id: {{ id }})</p>
         <a href={{ begginLink }}>Открыть сначала</a>
         <a href={{ continousLink }}>Продолжить чтение</a>
       </div>

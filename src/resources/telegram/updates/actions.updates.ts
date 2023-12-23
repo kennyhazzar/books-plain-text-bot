@@ -95,6 +95,7 @@ export class ActionsUpdate {
         inline_keyboard: getReadBookKeyboard(
           chunk.currentPage,
           chunk.totalPage,
+          `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
           chunk.bookId,
           `${appUrl}/r/${chunk.bookId}/${chunk.currentPage}?k=${ctx.state.user.apiKey}`,
         ),
