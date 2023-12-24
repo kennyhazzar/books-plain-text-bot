@@ -23,6 +23,9 @@ export class User extends BaseEntity {
   @Column()
   apiKey: string;
 
+  @Column({ default: 4096 })
+  chunkSize: number;
+
   @Column({ default: 5 })
   booksLimit: number;
 

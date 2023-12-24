@@ -45,7 +45,10 @@ export class BooksService {
   }
 
   async createBook(payload: CreateBookDto): Promise<number> {
-    const { chunks, totalIndex } = splitEveryN(payload.bookText);
+    const { chunks, totalIndex } = splitEveryN(
+      payload.bookText,
+      payload.user.chunkSize,
+    );
 
     const { raw } = await this.bookRepository.insert({
       author: payload?.author,
