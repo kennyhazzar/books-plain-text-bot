@@ -22,6 +22,16 @@ export class UsersService {
     return insertedUser;
   }
 
+  public async updateToken(user: User): Promise<string> {
+    const apiKey = generateId(15);
+    await this.userRepository.save({
+      ...user,
+      apiKey,
+    });
+
+    return apiKey;
+  }
+
   public async getByTelegramId(telegramId: number): Promise<User> {
     return this.userRepository.findOne({
       where: { telegramId },

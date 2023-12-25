@@ -35,6 +35,17 @@ export class MainUpdate {
     await next();
   }
 
+  @Command('refresh')
+  async updateToken(ctx: MainUpdateContext) {
+    const token = await this.usersService.updateToken(ctx.state.user);
+
+    const { appUrl } = this.configService.get<CommonConfigs>('common');
+
+    await ctx.reply(
+      `Вы обновили токен для авторизации, новая ссылка: ${appUrl}/menu?k=${token}`,
+    );
+  }
+
   @Command('search')
   async searchByText(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
