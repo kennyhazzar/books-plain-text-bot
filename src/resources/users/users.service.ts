@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InsertUserDto } from './dto/user.dto';
 import { generateId } from '@core/utils';
+import { LanguageCode } from '@core/types';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,13 @@ export class UsersService {
     });
 
     return insertedUser;
+  }
+
+  public async updateLanguage(user: User, languageCode: LanguageCode) {
+    await this.userRepository.save({
+      ...user,
+      languageCode,
+    });
   }
 
   public async updateToken(user: User): Promise<string> {

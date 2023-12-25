@@ -1,6 +1,7 @@
 import { Column, Entity, Index, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '@core/db';
 import { Book } from '@resources/books/entities';
+import { LanguageCode } from '@core/types';
 
 @Entity()
 export class User extends BaseEntity {
@@ -31,6 +32,9 @@ export class User extends BaseEntity {
 
   @Column({ default: 10485760, type: 'bigint' })
   fileSizeLimit: number;
+
+  @Column({ default: 'en' })
+  languageCode: LanguageCode;
 
   @JoinColumn()
   @OneToMany(() => Book, (book) => book.id)

@@ -8,9 +8,9 @@ import {
   GetBookDto,
   GetChunkDto,
 } from './dto';
-import { getPagesCount, splitEveryN } from '@core/utils';
+import { getPagesCount, getTextByLanguageCode, splitEveryN } from '@core/utils';
 import { ConfigService } from '@nestjs/config';
-import { CommonConfigs, Page } from '@core/types';
+import { CommonConfigs, LanguageCode, Page } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { User } from '@resources/users/entities';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -129,6 +129,7 @@ export class BooksService {
       bookId: chunk.book.id,
       currentPage: page,
       totalPage: chunk.book.totalIndex,
+      userLanguageCode: chunk.book.user.languageCode,
     };
   }
 
@@ -140,6 +141,8 @@ export class BooksService {
     result: GetBookDto[];
     userName: string;
     pageLinks: Array<Page>;
+    userLanguageCode: LanguageCode;
+    pagesText: string;
   }> {
     const result: GetBookDto[] = [];
 
@@ -165,7 +168,27 @@ export class BooksService {
 
     if (books.length > 0) {
       user = books[0].user;
+    } else {
+      return {
+        result: [],
+        userName: '404',
+        pageLinks: [],
+        userLanguageCode: 'en',
+        pagesText: 'Pages',
+      };
     }
+
+    const userLanguageCode = user.languageCode;
+
+    const begginText = getTextByLanguageCode(
+      userLanguageCode,
+      'books_open_begin',
+    );
+    const continousText = getTextByLanguageCode(
+      userLanguageCode,
+      'books_continue',
+    );
+    const pagesText = getTextByLanguageCode(userLanguageCode, 'books_pages');
 
     const apiKeyParam = `?k=${apiKey}`;
 
@@ -181,6 +204,8 @@ export class BooksService {
         currentPage: book.lastIndex,
         totalPage: book.totalIndex,
         percent: `${Math.round((100 * book.lastIndex) / book.totalIndex)} %`,
+        begginText,
+        continousText,
       });
     }
 
@@ -189,15 +214,17 @@ export class BooksService {
       userName: user
         ? `${
             user.firstName && user.secondName && user.username
-              ? `пользователя ${user.firstName} ${user.secondName} (${user.username})`
+              ? ` ${user.firstName} ${user.secondName} (${user.username})`
               : `${user.username}`
           }`
-        : 'Ошибка авторизации',
+        : getTextByLanguageCode('en', 'books_auth_error'),
       pageLinks: getPagesCount(
         booksCount,
         take,
         `${appUrl}/menu${apiKeyParam}`,
       ),
+      userLanguageCode,
+      pagesText,
     };
   }
 

@@ -3,15 +3,18 @@ import { Update as TelegrafUpdate } from 'telegraf/typings/core/types/typegram';
 import { BooksService } from '@resources/books/books.service';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { GetChunkDto } from '../../books/dto';
-import { getReadBookKeyboard } from '../../../core/telegram';
+import { getReadBookKeyboard, languageInlineKeyboard } from '@core/telegram';
 import { ConfigService } from '@nestjs/config';
 import { Actions } from '@core/telegram/actions';
+import { getLanguageByCode, getTextByLanguageCode } from '@core/utils';
+import { UsersService } from '../../users/users.service';
 
 @Update()
 export class ActionsUpdate {
   constructor(
     private readonly booksService: BooksService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Action(/demo_page_+/)
@@ -75,9 +78,15 @@ export class ActionsUpdate {
     );
 
     if (!chunk) {
-      ctx.answerCbQuery('Ошибка! Этой страницы или книги не существует!', {
-        show_alert: true,
-      });
+      ctx.answerCbQuery(
+        getTextByLanguageCode(
+          ctx.state.user.languageCode,
+          'error_page_not_found',
+        ),
+        {
+          show_alert: true,
+        },
+      );
 
       ctx.deleteMessage();
 
@@ -85,6 +94,40 @@ export class ActionsUpdate {
     }
 
     await this.updateMessage(ctx, chunk);
+  }
+
+  @Action(/language_+/)
+  async setLanguage(ctx: MainUpdateContext) {
+    const { callback_query: callbackQuery } =
+      ctx.update as TelegrafUpdate.CallbackQueryUpdate;
+
+    console.log(callbackQuery);
+
+    const [, , languageCode] = (callbackQuery as any).data.split('_');
+
+    if (languageCode && languageCode === ctx.state.user.languageCode) {
+      ctx.answerCbQuery(
+        getTextByLanguageCode(
+          ctx.state.user.languageCode,
+          'language_error_current_choice',
+        ),
+      );
+
+      return;
+    }
+
+    await this.usersService.updateLanguage(ctx.state.user, languageCode);
+
+    await ctx.editMessageText(
+      getTextByLanguageCode(languageCode, 'language', {
+        code: getLanguageByCode(languageCode)[languageCode],
+      }),
+      {
+        reply_markup: {
+          inline_keyboard: languageInlineKeyboard(languageCode),
+        },
+      },
+    );
   }
 
   private async updateMessage(ctx: MainUpdateContext, chunk: GetChunkDto) {
@@ -98,6 +141,7 @@ export class ActionsUpdate {
           `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
           chunk.bookId,
           `${appUrl}/r/${chunk.bookId}/${chunk.currentPage}?k=${ctx.state.user.apiKey}`,
+          ctx.state.user.languageCode,
         ),
       },
     });

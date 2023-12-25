@@ -1,4 +1,5 @@
 import { User } from '@resources/users/entities';
+import { LanguageCode } from '@core/types';
 
 export class CreateBookDto {
   title: string;
@@ -24,6 +25,8 @@ export class GetBookDto {
   totalPage: number;
   fileName?: string;
   percent?: string;
+  begginText?: string;
+  continousText?: string;
 }
 
 export class GetChunkDto {
@@ -32,4 +35,5 @@ export class GetChunkDto {
   bookId: number;
   currentPage: number;
   totalPage: number;
+  userLanguageCode: LanguageCode;
 }

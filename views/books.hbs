@@ -2,18 +2,18 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Список книг</title>
+    <title>{{ title }}</title>
   </head>
   <body class="dark-mode">
-    <h2>Список книг {{ userName }}</h2>
+    <h2>{{ title }} {{ userName }}</h2>
     {{#each books}}
       <div>
-        <p>{{ index }}. {{ title }} {{ author }}; {{ currentPage }} из {{ totalPage }} или {{ percent }} (id: {{ id }})</p>
-        <a href={{ begginLink }}>Открыть сначала</a>
-        <a href={{ continousLink }}>Продолжить чтение</a>
+        <p>{{ index }}. {{ title }} {{ author }}; {{ currentPage }} / {{ totalPage }} ; {{ percent }} (id: {{ id }})</p>
+        <a href={{ begginLink }}>{{ begginText }}</a>
+        <a href={{ continousLink }}>{{ continousText }}</a>
       </div>
     {{/each}}
-    <div><p>Страницы: </p>{{#each pageLinks}}<p><a href={{ url }}>{{index}}</a></p>{{/each}}</div>
+    <div><p>{{ pagesText }}: </p>{{#each pageLinks}}<p><a href={{ url }}>{{index}}</a></p>{{/each}}</div>
   </body>
 
   <style type="text/css">

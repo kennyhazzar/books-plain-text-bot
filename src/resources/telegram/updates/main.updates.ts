@@ -4,13 +4,19 @@ import {
   InlineKeyboardButton,
   Message,
 } from 'telegraf/typings/core/types/typegram';
-import { formatBytes, getBufferFromUrl, joinBookText } from '@core/utils';
+import {
+  formatBytes,
+  getBufferFromUrl,
+  getLanguageByCode,
+  getTextByLanguageCode,
+  joinBookText,
+} from '@core/utils';
 import { BooksService } from '@resources/books/books.service';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { UsersService } from '../../users/users.service';
 import { User } from '@resources/users/entities';
-import { getReadBookKeyboard, Actions } from '@core/telegram';
+import { getReadBookKeyboard, Actions, languageMenu } from '@core/telegram';
 
 @Update()
 export class MainUpdate {
@@ -35,6 +41,20 @@ export class MainUpdate {
     await next();
   }
 
+  @Command('lang')
+  async languageCommand(ctx: MainUpdateContext) {
+    const languageCode = ctx.state.user.languageCode;
+
+    console.log(languageCode);
+
+    await ctx.reply(
+      getTextByLanguageCode(languageCode, 'language', {
+        code: getLanguageByCode(languageCode)[languageCode],
+      }),
+      languageMenu(languageCode),
+    );
+  }
+
   @Command('refresh')
   async updateToken(ctx: MainUpdateContext) {
     const token = await this.usersService.updateToken(ctx.state.user);
@@ -42,18 +62,19 @@ export class MainUpdate {
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
     await ctx.reply(
-      `Вы обновили токен для авторизации, новая ссылка: ${appUrl}/menu?k=${token}`,
+      getTextByLanguageCode(ctx.state.user.languageCode, 'update_token', {
+        menuLink: `${appUrl}/menu?k=${token}`,
+      }),
     );
   }
 
   @Command('search')
   async searchByText(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
+    const languageCode = ctx.state.user.languageCode;
 
     if (message.text === '/search') {
-      ctx.reply(
-        'Синтаксис команды: /search <book-id> <text>, где book-id: идентификатор книги (целое число), а text - поисковой текстовый запрос. \nПример /search 7 действительности.\nДанный поиск работает только при полном вхождении.',
-      );
+      ctx.reply(getTextByLanguageCode(languageCode, 'search'));
 
       return;
     }
@@ -77,7 +98,7 @@ export class MainUpdate {
       );
 
       if (!searchResult) {
-        ctx.reply('По вашему запросу ничего не найдено!');
+        ctx.reply(getTextByLanguageCode(languageCode, 'search_empty_result'));
 
         return;
       }
@@ -85,36 +106,42 @@ export class MainUpdate {
       const keyboard: InlineKeyboardButton[][] = [
         ...searchResult.map(({ index }) => [
           {
-            text: `Страница ${index}`,
+            text: getTextByLanguageCode(languageCode, 'page_index', {
+              index: String(index),
+            }),
             callback_data: `demo_page_${bookId}_${index}`,
           },
         ]),
         [
           {
-            text: 'Закрыть',
+            text: getTextByLanguageCode(languageCode, 'close'),
             callback_data: Actions.CLOSE_BOOK,
           },
         ],
       ];
 
-      ctx.reply(`Всего найдено вхождений: ${searchResultCount}`, {
-        reply_markup: {
-          inline_keyboard: keyboard,
+      ctx.reply(
+        getTextByLanguageCode(languageCode, 'search_result', {
+          searchResultCount: `${searchResultCount}`,
+        }),
+        {
+          reply_markup: {
+            inline_keyboard: keyboard,
+          },
         },
-      });
+      );
     } else {
-      ctx.reply('Проверьте айди. Кажется, он не является целым числом');
+      ctx.reply(getTextByLanguageCode(languageCode, 'book_id_parse_error'));
     }
   }
 
   @Command('read')
   async readBookInChat(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
+    const languageCode = ctx.state.user.languageCode;
 
     if (message.text === '/read') {
-      ctx.reply(
-        'Синтаксис команды: /read <book-id>, где book-id: идентификатор книги (целое число).\nПример: /read 1\n\nЕсли книга найдена, вы получите текущую страницу и кнопки навигации',
-      );
+      ctx.reply(getTextByLanguageCode(languageCode, 'read'));
 
       return;
     }
@@ -126,7 +153,7 @@ export class MainUpdate {
       const book = await this.booksService.getBookById(+bookId, apiKey);
 
       if (!book) {
-        ctx.reply('Книга не была найдена!');
+        ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
 
         return;
       }
@@ -145,11 +172,12 @@ export class MainUpdate {
             `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
             chunk.bookId,
             book.continousLink,
+            languageCode,
           ),
         },
       });
     } else {
-      ctx.reply('Проверьте ваш айди. Кажется, он не является целым числом');
+      ctx.reply(getTextByLanguageCode(languageCode, 'book_id_parse_error'));
     }
   }
 
@@ -157,11 +185,10 @@ export class MainUpdate {
   async downloadBook(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
     const apiKey = ctx.state.user.apiKey;
+    const languageCode = ctx.state.user.languageCode;
 
     if (message.text === '/download') {
-      ctx.reply(
-        'Синтаксис команды: /download <book-id>, где book-id: идентификатор книги.\nПример: /download 1',
-      );
+      ctx.reply(getTextByLanguageCode(languageCode, 'download'));
 
       return;
     }
@@ -185,7 +212,7 @@ export class MainUpdate {
         },
       );
     } else {
-      ctx.reply('Книга не найдена');
+      ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
     }
   }
 
@@ -194,18 +221,20 @@ export class MainUpdate {
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
     ctx.reply(
-      `Ссылка на список книг: ${appUrl}/menu?k=${ctx.state.user.apiKey}`,
+      getTextByLanguageCode(ctx.state.user.languageCode, 'link', {
+        appUrl,
+        apiKey: ctx.state.user.apiKey,
+      }),
     );
   }
 
   @Command('delete')
   async deleteBook(ctx: MainUpdateContext) {
     const message = ctx.message as Message.TextMessage;
+    const languageCode = ctx.state.user.languageCode;
 
     if (message.text === '/delete') {
-      ctx.reply(
-        'Синтаксис команды: /delete <book-id>, где book-id: идентификатор книги.\nПример: /delete 1',
-      );
+      ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'delete'));
 
       return;
     }
@@ -218,13 +247,16 @@ export class MainUpdate {
     );
 
     if (!isDelete) {
-      ctx.reply('Ошибка при удалении! Нужно смотреть в консоль');
+      ctx.reply(getTextByLanguageCode(languageCode, 'delete_error'));
 
       return;
     }
 
     ctx.reply(
-      `Книга \`${book.title}\` автора \`${book.author}\` была удалена`,
+      getTextByLanguageCode(languageCode, 'delete_result', {
+        title: book.title,
+        author: book.author,
+      }),
       {
         parse_mode: 'Markdown',
       },
@@ -234,6 +266,7 @@ export class MainUpdate {
   @On('document')
   async getBook(ctx: MainUpdateContext) {
     const user = ctx.state.user;
+    const languageCode = user.languageCode;
 
     let processMessageId: number;
     let fileUrl = '';
@@ -247,11 +280,10 @@ export class MainUpdate {
 
     if (fileSize > user.fileSizeLimit) {
       ctx.reply(
-        `Файл слишком велик. Ваш лимит: ${formatBytes(
-          user.fileSizeLimit,
-        )}; Размер файла: ${formatBytes(
-          fileSize,
-        )}\nЧтобы увеличить лимит, напишите разработчику: @kennyhazzar`,
+        getTextByLanguageCode(languageCode, 'document_size_limit_error', {
+          fileSizeLimit: formatBytes(user.fileSizeLimit),
+          fileSize: formatBytes(fileSize),
+        }),
       );
 
       return;
@@ -263,7 +295,9 @@ export class MainUpdate {
 
     if (user.booksLimit <= booksCount) {
       ctx.reply(
-        'Вы достигли максимума книг на ваш аккаунт! Чтобы увеличить лимит, напишите разработчику: @kennyhazzar',
+        getTextByLanguageCode(languageCode, 'document_books_count_error', {
+          userLimit: String(user.booksLimit),
+        }),
       );
 
       return;
@@ -271,7 +305,10 @@ export class MainUpdate {
 
     if (fileName.endsWith('.txt')) {
       const messageReplyResult = await ctx.reply(
-        `Начинаю обработку...\n(Название книги: ${fileName}; Автор: ${author})`,
+        getTextByLanguageCode(languageCode, 'document_process_message', {
+          fileName,
+          author,
+        }),
       );
       processMessageId = messageReplyResult.message_id;
 
@@ -282,7 +319,7 @@ export class MainUpdate {
       } catch (error) {
         console.log(error);
         ctx.deleteMessage(processMessageId);
-        await ctx.reply('Ошибка:( Хз, нужно в консоль смотреть.');
+        await ctx.reply(getTextByLanguageCode(languageCode, 'document_error'));
 
         return;
       }
@@ -308,20 +345,18 @@ export class MainUpdate {
       } catch (error) {
         console.log(error);
         ctx.deleteMessage(processMessageId);
-        await ctx.reply('Ошибка:( Хз, нужно в консоль смотреть.');
+        await ctx.reply(getTextByLanguageCode(languageCode, 'document_error'));
 
         return;
       }
     } else {
-      ctx.reply('Я жду .txt файл ващето');
+      ctx.reply(getTextByLanguageCode(languageCode, 'document_not_txt_error'));
     }
   }
 
   @On('text')
   async onText(ctx: MainUpdateContext) {
-    ctx.reply(
-      `Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации\n\nВы также можете читать книги в чате бота! Используйте команду /read для получения информации`,
-    );
+    ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'));
   }
 
   private async checkUser(ctx: MainUpdateContext): Promise<User | null> {
@@ -335,12 +370,7 @@ export class MainUpdate {
         secondName: ctx.from?.last_name,
       });
 
-      ctx.reply(
-        `Вы зарегистрировались, ваш токен: \`${user.apiKey}\`. Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации\n\nВы также можете читать книги в чате бота! Используйте команду /read для получения информации`,
-        {
-          parse_mode: 'Markdown',
-        },
-      );
+      ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'));
     }
 
     if (user.isBlocked) {

@@ -21,6 +21,7 @@ import { CommonConfigs, TelegrafConfigs } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HandlebarsService } from '@gboutte/nestjs-hbs';
+import { getTextByLanguageCode } from '../../core/utils';
 
 @Controller()
 export class BooksController {
@@ -65,12 +66,16 @@ export class BooksController {
       result: books,
       userName,
       pageLinks,
+      userLanguageCode,
+      pagesText,
     } = await this.booksService.getAll(apiKey, page);
 
     return this.hbsService.renderFile('books.hbs', {
+      title: getTextByLanguageCode(userLanguageCode, 'books_title'),
       books,
       userName,
       pageLinks,
+      pagesText,
     });
   }
 
@@ -103,12 +108,24 @@ export class BooksController {
           page === 1 ? page : page - 1
         }${apiKeyParam}`,
         next: `${appUrl}/r/${chunk.bookId}/${page + 1}${apiKeyParam}`,
+        mainLinkText: getTextByLanguageCode(
+          chunk.userLanguageCode,
+          'page_menu_link',
+        ),
+        backLinkText: getTextByLanguageCode(
+          chunk.userLanguageCode,
+          'page_back_link',
+        ),
+        nextLinkText: getTextByLanguageCode(
+          chunk.userLanguageCode,
+          'page_next_link',
+        ),
       });
     } else {
       return this.hbsService.renderFile('page.hbs', {
         main: `${appUrl}${apiKeyParam}`,
-        title: 'Не найдено',
-        text: 'Страница или книга не найдены!',
+        title: getTextByLanguageCode('en', 'book_not_found'),
+        text: getTextByLanguageCode('en', 'error_page_not_found'),
       });
     }
   }
