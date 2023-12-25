@@ -373,7 +373,7 @@ export class MainUpdate {
         languageCode,
       });
 
-      ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'));
+      ctx.reply(getTextByLanguageCode(ctx.from.language_code, 'start'));
     }
 
     if (user.isBlocked) {
