@@ -193,7 +193,11 @@ export class BooksService {
               : `${user.username}`
           }`
         : 'Ошибка авторизации',
-      pageLinks: getPagesCount(booksCount, take, `${appUrl}${apiKeyParam}`),
+      pageLinks: getPagesCount(
+        booksCount,
+        take,
+        `${appUrl}/menu${apiKeyParam}`,
+      ),
     };
   }
 
