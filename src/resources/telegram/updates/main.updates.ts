@@ -363,11 +363,14 @@ export class MainUpdate {
     let user = await this.usersService.getByTelegramId(ctx.chat.id);
 
     if (!user) {
+      const languageCode = ctx.from.language_code === 'ru' ? 'ru' : 'en';
+
       user = await this.usersService.insert({
         telegramId: ctx.chat.id,
         username: ctx.from?.username,
         firstName: ctx.from?.first_name,
         secondName: ctx.from?.last_name,
+        languageCode,
       });
 
       ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'));

@@ -4,4 +4,5 @@ export class InsertUserDto {
   firstName?: string;
   secondName?: string;
   apiKey?: string;
+  languageCode?: string;
 }
