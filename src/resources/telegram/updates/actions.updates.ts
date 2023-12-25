@@ -101,8 +101,6 @@ export class ActionsUpdate {
     const { callback_query: callbackQuery } =
       ctx.update as TelegrafUpdate.CallbackQueryUpdate;
 
-    console.log(callbackQuery);
-
     const [, , languageCode] = (callbackQuery as any).data.split('_');
 
     if (languageCode && languageCode === ctx.state.user.languageCode) {
