@@ -10,7 +10,7 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Res,
+  Redirect,
   UnauthorizedException,
   UploadedFile,
   UseInterceptors,
@@ -21,7 +21,6 @@ import { CommonConfigs, TelegrafConfigs } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HandlebarsService } from '@gboutte/nestjs-hbs';
-import { Response } from 'express';
 
 @Controller()
 export class BooksController {
@@ -33,17 +32,33 @@ export class BooksController {
   ) {}
 
   @Get()
+  @Redirect()
+  async redirectToMain(@Query('k') apiKey: string) {
+    if (apiKey) {
+      const { appUrl: url } = this.configService.get<CommonConfigs>('common');
+      return {
+        url,
+      };
+    } else {
+      const { url } = this.configService.get<TelegrafConfigs>('tg');
+
+      return {
+        url,
+      };
+    }
+  }
+
+  @Get('menu')
   async getAll(
     @Query('k') apiKey: string,
     @Query('p', new DefaultValuePipe(1)) page: number,
-    @Res() response: Response,
   ) {
+    const { url } = this.configService.get<TelegrafConfigs>('tg');
+
     if (!apiKey) {
-      const { url } = this.configService.get<TelegrafConfigs>('tg');
-
-      response.redirect(url);
-
-      return;
+      throw new UnauthorizedException(
+        `query param "k" is required! use ?k=<key>, or sign up in ${url}`,
+      );
     }
 
     const {

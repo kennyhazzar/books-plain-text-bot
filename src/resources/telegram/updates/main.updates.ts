@@ -182,7 +182,9 @@ export class MainUpdate {
   async getLink(ctx: MainUpdateContext) {
     const { appUrl } = this.configService.get<CommonConfigs>('common');
 
-    ctx.reply(`Ссылка на список книг: ${appUrl}?k=${ctx.state.user.apiKey}`);
+    ctx.reply(
+      `Ссылка на список книг: ${appUrl}/menu?k=${ctx.state.user.apiKey}`,
+    );
   }
 
   @Command('delete')
