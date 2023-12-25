@@ -372,8 +372,6 @@ export class MainUpdate {
         secondName: ctx.from?.last_name,
         languageCode,
       });
-
-      ctx.reply(getTextByLanguageCode(ctx.from.language_code, 'start'));
     }
 
     if (user.isBlocked) {
