@@ -180,9 +180,7 @@ export class BooksService {
         continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
         currentPage: book.lastIndex,
         totalPage: book.totalIndex,
-        percent: `( ${Math.round(
-          (100 * book.lastIndex) / book.totalIndex,
-        )} % )`,
+        percent: `${Math.round((100 * book.lastIndex) / book.totalIndex)} %`,
       });
     }
 

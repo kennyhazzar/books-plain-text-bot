@@ -14,6 +14,7 @@ export class DatabaseConfigs {
 
 export class TelegrafConfigs {
   token: string;
+  url: string;
 }
 
 export class RedisConfigs {

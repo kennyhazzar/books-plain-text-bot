@@ -14,6 +14,7 @@ const common = registerAs<CommonConfigs>('common', () => ({
 
 const telegram = registerAs<TelegrafConfigs>('tg', () => ({
   token: process.env.BOT_TOKEN,
+  url: process.env.BOT_URL,
 }));
 
 const database = registerAs<DatabaseConfigs>('db', () => ({
@@ -37,6 +38,7 @@ export const EnvConfig: ConfigModuleOptions = {
     PORT: Joi.string().required(),
     APP_URL: Joi.string().required(),
     BOT_TOKEN: Joi.string().required(),
+    BOT_URL: Joi.string().required(),
     DB_TYPE: Joi.string().required(),
     DB_HOST: Joi.string().required(),
     DB_PORT: Joi.number().required(),

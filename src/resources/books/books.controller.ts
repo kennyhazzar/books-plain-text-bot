@@ -10,16 +10,18 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  Res,
   UnauthorizedException,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { ConfigService } from '@nestjs/config';
-import { CommonConfigs } from '@core/types';
+import { CommonConfigs, TelegrafConfigs } from '@core/types';
 import { UsersService } from '@resources/users/users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HandlebarsService } from '@gboutte/nestjs-hbs';
+import { Response } from 'express';
 
 @Controller()
 export class BooksController {
@@ -34,11 +36,14 @@ export class BooksController {
   async getAll(
     @Query('k') apiKey: string,
     @Query('p', new DefaultValuePipe(1)) page: number,
+    @Res() response: Response,
   ) {
     if (!apiKey) {
-      throw new UnauthorizedException(
-        'query param "k" is required! use ?k=<key>',
-      );
+      const { url } = this.configService.get<TelegrafConfigs>('tg');
+
+      response.redirect(url);
+
+      return;
     }
 
     const {
@@ -70,9 +75,9 @@ export class BooksController {
 
     const chunk = await this.booksService.getPageByBookId(bookId, page, apiKey);
 
-    if (chunk) {
-      const { appUrl } = this.configService.get<CommonConfigs>('common');
+    const { appUrl } = this.configService.get<CommonConfigs>('common');
 
+    if (chunk) {
       return this.hbsService.renderFile('page.hbs', {
         ...chunk,
         percent: `( ${Math.round(
@@ -85,8 +90,6 @@ export class BooksController {
         next: `${appUrl}/r/${chunk.bookId}/${page + 1}${apiKeyParam}`,
       });
     } else {
-      const { appUrl } = this.configService.get<CommonConfigs>('common');
-
       return this.hbsService.renderFile('page.hbs', {
         main: `${appUrl}${apiKeyParam}`,
         title: 'Не найдено',
