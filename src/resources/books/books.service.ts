@@ -143,6 +143,8 @@ export class BooksService {
     pageLinks: Array<Page>;
     userLanguageCode: LanguageCode;
     pagesText: string;
+    totalPageCount: number;
+    booksCount: number;
   }> {
     const result: GetBookDto[] = [];
 
@@ -175,6 +177,8 @@ export class BooksService {
         pageLinks: [],
         userLanguageCode: 'en',
         pagesText: 'Pages',
+        totalPageCount: 0,
+        booksCount: 0,
       };
     }
 
@@ -197,7 +201,7 @@ export class BooksService {
       result.push({
         id: book.id,
         index: index + skip + 1,
-        title: book.title,
+        title: book.title.replace(/.txt/g, ''),
         author: book.author,
         begginLink: `${appUrl}/r/${book.id}/1${apiKeyParam}`,
         continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
@@ -209,6 +213,12 @@ export class BooksService {
       });
     }
 
+    const pageLinks = getPagesCount(
+      booksCount,
+      take,
+      `${appUrl}/menu${apiKeyParam}`,
+    );
+
     return {
       result,
       userName: user
@@ -218,13 +228,11 @@ export class BooksService {
               : `${user.username}`
           }`
         : getTextByLanguageCode('en', 'books_auth_error'),
-      pageLinks: getPagesCount(
-        booksCount,
-        take,
-        `${appUrl}/menu${apiKeyParam}`,
-      ),
+      pageLinks,
       userLanguageCode,
       pagesText,
+      totalPageCount: pageLinks?.length,
+      booksCount,
     };
   }
 
@@ -244,13 +252,14 @@ export class BooksService {
 
       return {
         id: book.id,
-        title: book.title,
+        title: book.title.replace(/.txt/g, ''),
         author: book.author,
         begginLink: `${appUrl}/r/${book.id}/1${apiKeyParam}`,
         continousLink: `${appUrl}/r/${book.id}/${book.lastIndex}${apiKeyParam}`,
         currentPage: book.lastIndex,
         totalPage: book.totalIndex,
         fileName: book.title,
+        percent: `${Math.round((100 * book.lastIndex) / book.totalIndex)} %`,
       };
     }
   }

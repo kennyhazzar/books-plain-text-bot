@@ -156,4 +156,54 @@ export const texts: Localization[] = [
     ru: 'Вы уже выбрали этот язык',
     en: 'You have already selected this language',
   },
+  {
+    target: 'menu_page',
+    ru: 'Текущая страница: %currentPage%\nВсего страниц: %totalPage%\nВсего книг: %bookCount%',
+    en: 'Current page: %currentPage%\nAll pages: %totalPage%\nAll books: %bookCount%',
+  },
+  {
+    target: 'menu_book',
+    ru: '%title% %author%; %currentPage% / %totalPage% ; %percent% (id: %id%)\n',
+    en: '%title% %%author; %currentPage% / %totalPage% ; %percent% (id: %id%)\n',
+  },
+  {
+    target: 'empty_partile',
+    ru: 'Пусто',
+    en: 'Empty',
+  },
+  {
+    target: 'no_changes_detected',
+    ru: 'Изменений не обнаружено',
+    en: 'No changes detected',
+  },
+  {
+    target: 'menu_books_not_found',
+    ru: 'Вы еще не добавили книги в систему. Отправьте .txt файл',
+    en: `You haven't added books to the system yet. Send .txt file`,
+  },
+  {
+    target: 'book_menu_read_chat',
+    ru: 'Читать в чате',
+    en: 'Read in chat',
+  },
+  {
+    target: 'book_menu_read_web',
+    ru: 'Читать в браузере',
+    en: 'Read in browser',
+  },
+  {
+    target: 'book_menu_delete',
+    ru: 'Удалить',
+    en: 'Delete book',
+  },
+  {
+    target: 'book_menu_download',
+    ru: 'Скачать',
+    en: 'Download',
+  },
+  {
+    target: 'menu_particle',
+    ru: 'Меню',
+    en: 'Menu',
+  },
 ];

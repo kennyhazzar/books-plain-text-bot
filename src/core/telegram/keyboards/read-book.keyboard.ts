@@ -38,6 +38,12 @@ export const getReadBookKeyboard = (
         callback_data: Actions.CLOSE_BOOK,
       },
     ],
+    [
+      {
+        text: getTextByLanguageCode(languageCode, 'menu_particle'),
+        callback_data: `${Actions.MENU_PAGE}1`,
+      },
+    ],
   ];
 
   if (currentPage !== 1) {

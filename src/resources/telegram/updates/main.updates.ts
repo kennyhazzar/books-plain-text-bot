@@ -360,7 +360,18 @@ export class MainUpdate {
 
   @On('text')
   async onText(ctx: MainUpdateContext) {
-    ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'));
+    ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'), {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Список книг',
+              callback_data: `${Actions.MENU_PAGE}1`,
+            },
+          ],
+        ],
+      },
+    });
   }
 
   private async checkUser(ctx: MainUpdateContext): Promise<User | null> {

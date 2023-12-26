@@ -30,7 +30,17 @@ export type Target =
   | 'page_menu_link'
   | 'page_back_link'
   | 'page_next_link'
-  | 'language_error_current_choice';
+  | 'language_error_current_choice'
+  | 'menu_page'
+  | 'menu_book'
+  | 'empty_partile'
+  | 'no_changes_detected'
+  | 'menu_books_not_found'
+  | 'book_menu_read_chat'
+  | 'book_menu_read_web'
+  | 'book_menu_delete'
+  | 'book_menu_download'
+  | 'menu_particle';
 
 export type LanguageCode = 'ru' | 'en' | string;
 
