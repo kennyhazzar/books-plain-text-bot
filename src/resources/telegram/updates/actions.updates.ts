@@ -201,7 +201,7 @@ export class ActionsUpdate {
             inline_keyboard: getOneBookMenuKeyboard(
               +bookId,
               languageCode,
-              `${appUrl}/r/${id}/1?k=${apiKey}`,
+              `${appUrl}/r/${id}/${currentPage}?k=${apiKey}`,
             ),
           },
         },
