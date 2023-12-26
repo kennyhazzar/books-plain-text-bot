@@ -94,6 +94,16 @@ export class ActionsUpdate {
           author: book.author,
         }),
         {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: getTextByLanguageCode(languageCode, 'menu_particle'),
+                  callback_data: `${Actions.MENU_PAGE}1`,
+                },
+              ],
+            ],
+          },
           parse_mode: 'Markdown',
         },
       );
