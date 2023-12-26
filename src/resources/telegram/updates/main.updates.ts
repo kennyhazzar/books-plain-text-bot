@@ -28,6 +28,10 @@ export class MainUpdate {
 
   @Use()
   async checkUserMiddleware(ctx: MainUpdateContext, next: () => Promise<void>) {
+    if (ctx.chat.type !== 'private') {
+      return;
+    }
+
     let user: User;
 
     if (ctx) {
