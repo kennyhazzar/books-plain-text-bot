@@ -1,10 +1,27 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { BaseEntity } from '@core/db';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { BooksChunk } from './books-chunk.entity';
 import { User } from '@resources/users/entities';
 
 @Entity()
-export class Book extends BaseEntity {
+export class Book {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @Column()
   title: string;
 

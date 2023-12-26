@@ -50,7 +50,7 @@ export const getBooksKeyboard = (
 };
 
 export const getOneBookMenuKeyboard = (
-  bookId: number,
+  bookId: string,
   languageCode: LanguageCode,
   bookUrl: string,
 ): InlineKeyboardButton[][] => [

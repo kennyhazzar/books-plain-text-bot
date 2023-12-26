@@ -83,58 +83,54 @@ export class MainUpdate {
 
     const [, bookId, text] = message.text.split(' ');
 
-    if (!Number.isNaN(+bookId)) {
-      const apiKey = ctx.state.user.apiKey;
-      const book = await this.booksService.getBookById(+bookId, apiKey);
+    const apiKey = ctx.state.user.apiKey;
+    const book = await this.booksService.getBookById(bookId, apiKey);
 
-      if (!book) {
-        ctx.reply('Книга не была найдена!');
+    if (!book) {
+      ctx.reply('Книга не была найдена!');
 
-        return;
-      }
-
-      const [searchResult, searchResultCount] = await this.booksService.search(
-        text,
-        +bookId,
-        apiKey,
-      );
-
-      if (!searchResult) {
-        ctx.reply(getTextByLanguageCode(languageCode, 'search_empty_result'));
-
-        return;
-      }
-
-      const keyboard: InlineKeyboardButton[][] = [
-        ...searchResult.map(({ index }) => [
-          {
-            text: getTextByLanguageCode(languageCode, 'page_index', {
-              index: String(index),
-            }),
-            callback_data: `demo_page_${bookId}_${index}`,
-          },
-        ]),
-        [
-          {
-            text: getTextByLanguageCode(languageCode, 'close'),
-            callback_data: Actions.CLOSE_BOOK,
-          },
-        ],
-      ];
-
-      ctx.reply(
-        getTextByLanguageCode(languageCode, 'search_result', {
-          searchResultCount: `${searchResultCount}`,
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: keyboard,
-          },
-        },
-      );
-    } else {
-      ctx.reply(getTextByLanguageCode(languageCode, 'book_id_parse_error'));
+      return;
     }
+
+    const [searchResult, searchResultCount] = await this.booksService.search(
+      text,
+      bookId,
+      apiKey,
+    );
+
+    if (!searchResult) {
+      ctx.reply(getTextByLanguageCode(languageCode, 'search_empty_result'));
+
+      return;
+    }
+
+    const keyboard: InlineKeyboardButton[][] = [
+      ...searchResult.map(({ index }) => [
+        {
+          text: getTextByLanguageCode(languageCode, 'page_index', {
+            index: String(index),
+          }),
+          callback_data: `demo_page_${bookId}_${index}`,
+        },
+      ]),
+      [
+        {
+          text: getTextByLanguageCode(languageCode, 'close'),
+          callback_data: Actions.CLOSE_BOOK,
+        },
+      ],
+    ];
+
+    ctx.reply(
+      getTextByLanguageCode(languageCode, 'search_result', {
+        searchResultCount: `${searchResultCount}`,
+      }),
+      {
+        reply_markup: {
+          inline_keyboard: keyboard,
+        },
+      },
+    );
   }
 
   @Command('read')
@@ -150,37 +146,33 @@ export class MainUpdate {
 
     const [, bookId] = message.text.split(' ');
 
-    if (!Number.isNaN(+bookId)) {
-      const apiKey = ctx.state.user.apiKey;
-      const book = await this.booksService.getBookById(+bookId, apiKey);
+    const apiKey = ctx.state.user.apiKey;
+    const book = await this.booksService.getBookById(bookId, apiKey);
 
-      if (!book) {
-        ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
+    if (!book) {
+      ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
 
-        return;
-      }
-
-      const chunk = await this.booksService.getPageByBookId(
-        +bookId,
-        book.currentPage,
-        apiKey,
-      );
-
-      ctx.reply(chunk.text, {
-        reply_markup: {
-          inline_keyboard: getReadBookKeyboard(
-            chunk.currentPage,
-            chunk.totalPage,
-            `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
-            chunk.bookId,
-            book.continousLink,
-            languageCode,
-          ),
-        },
-      });
-    } else {
-      ctx.reply(getTextByLanguageCode(languageCode, 'book_id_parse_error'));
+      return;
     }
+
+    const chunk = await this.booksService.getPageByBookId(
+      bookId,
+      book.currentPage,
+      apiKey,
+    );
+
+    ctx.reply(chunk.text, {
+      reply_markup: {
+        inline_keyboard: getReadBookKeyboard(
+          chunk.currentPage,
+          chunk.totalPage,
+          `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
+          chunk.bookId,
+          book.continousLink,
+          languageCode,
+        ),
+      },
+    });
   }
 
   @Command('download')
@@ -197,11 +189,11 @@ export class MainUpdate {
 
     const [, bookId] = message.text.split(' ');
 
-    const book = await this.booksService.getBookById(+bookId, apiKey);
+    const book = await this.booksService.getBookById(bookId, apiKey);
 
     if (book) {
       const chunks = await this.booksService.getAllChunksByBookId(
-        +bookId,
+        bookId,
         apiKey,
       );
 
@@ -244,7 +236,7 @@ export class MainUpdate {
     const [, bookId] = message.text.split(' ');
 
     const { result: isDelete, book } = await this.booksService.deleteBookById(
-      +bookId,
+      bookId,
       ctx.state.user.apiKey,
     );
 

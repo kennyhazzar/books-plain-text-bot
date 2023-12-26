@@ -81,7 +81,7 @@ export class BooksController {
 
   @Get('r/:id/:page')
   async getBookPage(
-    @Param('id', ParseIntPipe) bookId: number,
+    @Param('id') bookId: string,
     @Param('page', ParseIntPipe) page: number,
     @Query('k') apiKey: string,
   ) {

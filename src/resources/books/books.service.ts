@@ -28,7 +28,7 @@ export class BooksService {
   ) {}
 
   async getAllChunksByBookId(
-    id: number,
+    id: string,
     apiKey: string,
   ): Promise<BooksChunk[]> {
     return this.bookChunkRepository.find({
@@ -57,7 +57,7 @@ export class BooksService {
       user: payload.user,
     });
 
-    const insertedBookId = +raw[0]?.id;
+    const insertedBookId = raw[0]?.id;
 
     const chunksToInsert: CreateBooksChunkDto[] = chunks.map(
       ({ chunk: text, index }) => ({
@@ -73,7 +73,7 @@ export class BooksService {
   }
 
   async getPageByBookId(
-    id: number,
+    id: string,
     page: number,
     apiKey: string,
     saveCurrentPage = true,
@@ -236,7 +236,7 @@ export class BooksService {
     };
   }
 
-  async getBookById(id: number, apiKey: string): Promise<GetBookDto> {
+  async getBookById(id: string, apiKey: string): Promise<GetBookDto> {
     const book = await this.bookRepository.findOne({
       where: {
         id,
@@ -265,7 +265,7 @@ export class BooksService {
   }
 
   async deleteBookById(
-    id: number,
+    id: string,
     apiKey: string,
   ): Promise<{ book: Book | null; result: boolean }> {
     const book = await this.bookRepository.findOne({
@@ -323,7 +323,7 @@ export class BooksService {
 
   async search(
     text: string,
-    bookId: number,
+    bookId: string,
     apiKey: string,
     page = 1,
     take = 5,
@@ -345,7 +345,7 @@ export class BooksService {
     });
   }
 
-  private async getChunk(id: number, page: number, apiKey: string) {
+  private async getChunk(id: string, page: number, apiKey: string) {
     return await this.bookChunkRepository.findOne({
       where: {
         book: {

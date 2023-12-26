@@ -9,13 +9,13 @@ export class CreateBookDto {
 }
 
 export class CreateBooksChunkDto {
-  book: { id: number };
+  book: { id: string };
   text: string;
   index: number;
 }
 
 export class GetBookDto {
-  id: number;
+  id: string;
   index?: number;
   title: string;
   author: string;
@@ -32,7 +32,7 @@ export class GetBookDto {
 export class GetChunkDto {
   text: string;
   title: string;
-  bookId: number;
+  bookId: string;
   currentPage: number;
   totalPage: number;
   userLanguageCode: LanguageCode;

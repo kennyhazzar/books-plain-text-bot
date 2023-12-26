@@ -37,11 +37,11 @@ export class ActionsUpdate {
 
       const [, bookId] = (callbackQuery as any).data.split('download_');
 
-      const book = await this.booksService.getBookById(+bookId, apiKey);
+      const book = await this.booksService.getBookById(bookId, apiKey);
 
       if (book) {
         const chunks = await this.booksService.getAllChunksByBookId(
-          +bookId,
+          bookId,
           apiKey,
         );
 
@@ -76,7 +76,7 @@ export class ActionsUpdate {
       const [, bookId] = (callbackQuery as any).data.split('delete_');
 
       const { result: isDelete, book } = await this.booksService.deleteBookById(
-        +bookId,
+        bookId,
         ctx.state.user.apiKey,
       );
 
@@ -123,39 +123,33 @@ export class ActionsUpdate {
 
       const [, bookId] = (callbackQuery as any).data.split('chat_');
 
-      if (!Number.isNaN(+bookId)) {
-        const apiKey = ctx.state.user.apiKey;
-        const book = await this.booksService.getBookById(+bookId, apiKey);
+      const apiKey = ctx.state.user.apiKey;
+      const book = await this.booksService.getBookById(bookId, apiKey);
 
-        if (!book) {
-          ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
+      if (!book) {
+        ctx.reply(getTextByLanguageCode(languageCode, 'book_not_found'));
 
-          return;
-        }
-
-        const chunk = await this.booksService.getPageByBookId(
-          +bookId,
-          book.currentPage,
-          apiKey,
-        );
-
-        ctx.editMessageText(chunk.text, {
-          reply_markup: {
-            inline_keyboard: getReadBookKeyboard(
-              chunk.currentPage,
-              chunk.totalPage,
-              `( ${Math.round(
-                (100 * chunk.currentPage) / chunk.totalPage,
-              )} % )`,
-              chunk.bookId,
-              book.continousLink,
-              languageCode,
-            ),
-          },
-        });
-      } else {
-        ctx.reply(getTextByLanguageCode(languageCode, 'book_id_parse_error'));
+        return;
       }
+
+      const chunk = await this.booksService.getPageByBookId(
+        bookId,
+        book.currentPage,
+        apiKey,
+      );
+
+      ctx.editMessageText(chunk.text, {
+        reply_markup: {
+          inline_keyboard: getReadBookKeyboard(
+            chunk.currentPage,
+            chunk.totalPage,
+            `( ${Math.round((100 * chunk.currentPage) / chunk.totalPage)} % )`,
+            chunk.bookId,
+            book.continousLink,
+            languageCode,
+          ),
+        },
+      });
     } catch (error) {
       ctx.answerCbQuery('error');
       console.log(error);
@@ -173,7 +167,7 @@ export class ActionsUpdate {
 
       const [, , bookId] = (callbackQuery as any).data.split('_');
 
-      const book = await this.booksService.getBookById(+bookId, apiKey);
+      const book = await this.booksService.getBookById(bookId, apiKey);
 
       if (!book) {
         await ctx.deleteMessage();
@@ -199,7 +193,7 @@ export class ActionsUpdate {
         {
           reply_markup: {
             inline_keyboard: getOneBookMenuKeyboard(
-              +bookId,
+              bookId,
               languageCode,
               `${appUrl}/r/${id}/${currentPage}?k=${apiKey}`,
             ),
@@ -257,7 +251,7 @@ export class ActionsUpdate {
     const [, , bookId, page] = (callbackQuery as any).data.split('_');
 
     const chunk = await this.booksService.getPageByBookId(
-      +bookId,
+      bookId,
       +page,
       ctx.state.user.apiKey,
       false,
@@ -304,7 +298,7 @@ export class ActionsUpdate {
     const [, bookId, page] = (callbackQuery as any).data.split('_');
 
     const chunk = await this.booksService.getPageByBookId(
-      +bookId,
+      bookId,
       +page,
       ctx.state.user.apiKey,
     );

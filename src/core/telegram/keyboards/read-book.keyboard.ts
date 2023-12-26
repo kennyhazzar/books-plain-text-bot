@@ -5,7 +5,7 @@ import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { getTextByLanguageCode } from '../../utils';
 
 const getNavigationInlineButton = (
-  bookId: number,
+  bookId: string,
   currentPage: number,
   action: 'prev' | 'next',
 ): InlineKeyboardButton => {
@@ -21,7 +21,7 @@ export const getReadBookKeyboard = (
   currentPage: number,
   totalPage: number,
   percent: string,
-  bookId: number,
+  bookId: string,
   url: string,
   languageCode: LanguageCode,
 ): InlineKeyboardButton[][] => {
