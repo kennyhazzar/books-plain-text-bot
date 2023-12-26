@@ -78,4 +78,10 @@ export const getOneBookMenuKeyboard = (
       callback_data: `${Actions.BOOK_MENU_DOWNLOAD}${bookId}`,
     },
   ],
+  [
+    {
+      text: getTextByLanguageCode(languageCode, 'menu_particle'),
+      callback_data: `${Actions.MENU_PAGE}1`,
+    },
+  ],
 ];
