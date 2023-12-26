@@ -49,8 +49,6 @@ export class MainUpdate {
   async languageCommand(ctx: MainUpdateContext) {
     const languageCode = ctx.state.user.languageCode;
 
-    console.log(languageCode);
-
     await ctx.reply(
       getTextByLanguageCode(languageCode, 'language', {
         code: getLanguageByCode(languageCode)[languageCode],
