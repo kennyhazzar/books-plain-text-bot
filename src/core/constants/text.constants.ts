@@ -164,7 +164,7 @@ export const texts: Localization[] = [
   {
     target: 'menu_book',
     ru: '%title% %author%; %currentPage% / %totalPage% ; %percent% (id: %id%)\n',
-    en: '%title% %%author; %currentPage% / %totalPage% ; %percent% (id: %id%)\n',
+    en: '%title% %author%; %currentPage% / %totalPage% ; %percent% (id: %id%)\n',
   },
   {
     target: 'empty_partile',
