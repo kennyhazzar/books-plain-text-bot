@@ -38,6 +38,9 @@ export class MainUpdate {
     if (ctx) {
       user = await this.checkUser(ctx);
       ctx.state.user = user;
+
+      console.log(user);
+
       await next();
 
       return;
@@ -351,12 +354,14 @@ export class MainUpdate {
 
   @On('text')
   async onText(ctx: MainUpdateContext) {
-    ctx.reply(getTextByLanguageCode(ctx.state.user.languageCode, 'start'), {
+    const languageCode = ctx.state.user.languageCode;
+
+    await ctx.reply(getTextByLanguageCode(languageCode, 'start'), {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: 'Список книг',
+              text: getTextByLanguageCode(languageCode, 'books_title'),
               callback_data: `${Actions.MENU_PAGE}1`,
             },
           ],

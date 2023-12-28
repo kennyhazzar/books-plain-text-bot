@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InsertUserDto, UpdateTelegramProfileDto } from './dto/user.dto';
 import { generateId } from '@core/utils';
 import { LanguageCode } from '@core/types';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   public async insert(user: InsertUserDto): Promise<User> {
@@ -20,6 +23,11 @@ export class UsersService {
       apiKey,
     });
 
+    await this.cacheManager.set(
+      `book_user_${insertedUser.telegramId}`,
+      insertedUser,
+    );
+
     return insertedUser;
   }
 
@@ -27,33 +35,51 @@ export class UsersService {
     user: User,
     newProfile: UpdateTelegramProfileDto,
   ) {
-    await this.userRepository.save({
+    const updatedUser = await this.userRepository.save({
       ...user,
       ...newProfile,
     });
+
+    await this.cacheManager.set(`book_user_${user.telegramId}`, updatedUser);
   }
 
   public async updateLanguage(user: User, languageCode: LanguageCode) {
-    await this.userRepository.save({
+    const updatedUser = await this.userRepository.save({
       ...user,
       languageCode,
     });
+
+    await this.cacheManager.set(`book_user_${user.telegramId}`, updatedUser);
   }
 
   public async updateToken(user: User): Promise<string> {
     const apiKey = generateId(15);
-    await this.userRepository.save({
+    const updatedUser = await this.userRepository.save({
       ...user,
       apiKey,
     });
+
+    await this.cacheManager.set(`book_user_${user.telegramId}`, updatedUser);
 
     return apiKey;
   }
 
   public async getByTelegramId(telegramId: number): Promise<User> {
-    return this.userRepository.findOne({
-      where: { telegramId },
-    });
+    const cacheKey = `book_user_${telegramId}`;
+
+    let user = await this.cacheManager.get<User>(cacheKey);
+
+    if (!user) {
+      user = await this.userRepository.findOne({
+        where: { telegramId },
+      });
+
+      if (user) {
+        await this.cacheManager.set(cacheKey, user);
+      }
+    }
+
+    return user;
   }
 
   public async getByApiKey(apiKey: string) {

@@ -11,7 +11,6 @@ import {
 import { getPagesCount, getTextByLanguageCode, splitEveryN } from '@core/utils';
 import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, LanguageCode, Page } from '@core/types';
-import { UsersService } from '@resources/users/users.service';
 import { User } from '@resources/users/entities';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -19,7 +18,6 @@ import { Cache } from 'cache-manager';
 @Injectable()
 export class BooksService {
   constructor(
-    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
     @InjectRepository(Book) private readonly bookRepository: Repository<Book>,
     @InjectRepository(BooksChunk)
