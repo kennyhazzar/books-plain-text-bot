@@ -16,7 +16,12 @@ import { ConfigService } from '@nestjs/config';
 import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { UsersService } from '../../users/users.service';
 import { User } from '@resources/users/entities';
-import { getReadBookKeyboard, Actions, languageMenu } from '@core/telegram';
+import {
+  getReadBookKeyboard,
+  Actions,
+  languageMenu,
+  getBooksKeyboard,
+} from '@core/telegram';
 import * as generateMd5 from 'md5';
 
 @Update()
@@ -39,14 +44,40 @@ export class MainUpdate {
       user = await this.checkUser(ctx);
       ctx.state.user = user;
 
-      console.log(user);
-
       await next();
 
       return;
     }
 
     await next();
+  }
+
+  @Command('menu')
+  async menu(ctx: MainUpdateContext) {
+    const languageCode = ctx.state.user.languageCode;
+
+    try {
+      const { result, totalPageCount, booksCount } =
+        await this.booksService.getAll(ctx.state.user.apiKey, 1);
+
+      if (!result.length) {
+        ctx.reply(getTextByLanguageCode(languageCode, 'menu_books_not_found'));
+      }
+
+      const newText = getTextByLanguageCode(languageCode, 'menu_page', {
+        currentPage: '1',
+        totalPage: `${totalPageCount}`,
+        bookCount: `${booksCount}`,
+      });
+
+      await ctx.reply(newText, {
+        reply_markup: {
+          inline_keyboard: getBooksKeyboard(result, 1, totalPageCount),
+        },
+      });
+    } catch (error) {
+      ctx.reply(getTextByLanguageCode(languageCode, 'no_changes_detected'));
+    }
   }
 
   @Command('lang')
