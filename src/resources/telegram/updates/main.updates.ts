@@ -17,6 +17,7 @@ import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { UsersService } from '../../users/users.service';
 import { User } from '@resources/users/entities';
 import { getReadBookKeyboard, Actions, languageMenu } from '@core/telegram';
+import * as generateMd5 from 'md5';
 
 @Update()
 export class MainUpdate {
@@ -365,6 +366,11 @@ export class MainUpdate {
   }
 
   private async checkUser(ctx: MainUpdateContext): Promise<User | null> {
+    const { first_name: firstName, last_name: secondName, username } = ctx.from;
+    const md5 = generateMd5(
+      JSON.stringify({ firstName, secondName, username }),
+    );
+
     let user = await this.usersService.getByTelegramId(ctx.chat.id);
 
     if (!user) {
@@ -376,7 +382,12 @@ export class MainUpdate {
         firstName: ctx.from?.first_name,
         secondName: ctx.from?.last_name,
         languageCode,
+        md5,
       });
+    }
+
+    if (user.md5 !== md5) {
+      this.usersService.updateMd5(user, md5);
     }
 
     if (user.isBlocked) {

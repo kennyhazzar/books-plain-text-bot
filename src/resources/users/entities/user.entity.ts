@@ -9,6 +9,9 @@ export class User extends BaseEntity {
   @Column({ unique: true, type: 'bigint' })
   telegramId: number;
 
+  @Column({ nullable: true })
+  md5: string;
+
   @Column({ nullable: true, unique: true })
   username: string;
 

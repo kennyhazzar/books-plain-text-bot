@@ -5,4 +5,5 @@ export class InsertUserDto {
   secondName?: string;
   apiKey?: string;
   languageCode?: string;
+  md5?: string;
 }

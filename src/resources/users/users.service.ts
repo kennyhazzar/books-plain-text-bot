@@ -23,6 +23,13 @@ export class UsersService {
     return insertedUser;
   }
 
+  public async updateMd5(user: User, md5: string) {
+    await this.userRepository.save({
+      ...user,
+      md5,
+    });
+  }
+
   public async updateLanguage(user: User, languageCode: LanguageCode) {
     await this.userRepository.save({
       ...user,
