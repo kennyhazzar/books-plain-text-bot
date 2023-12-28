@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { InsertUserDto } from './dto/user.dto';
+import { InsertUserDto, UpdateTelegramProfileDto } from './dto/user.dto';
 import { generateId } from '@core/utils';
 import { LanguageCode } from '@core/types';
 
@@ -23,10 +23,13 @@ export class UsersService {
     return insertedUser;
   }
 
-  public async updateMd5(user: User, md5: string) {
+  public async updateTelegramProfile(
+    user: User,
+    newProfile: UpdateTelegramProfileDto,
+  ) {
     await this.userRepository.save({
       ...user,
-      md5,
+      ...newProfile,
     });
   }
 

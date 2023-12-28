@@ -387,7 +387,12 @@ export class MainUpdate {
     }
 
     if (user.md5 !== md5) {
-      this.usersService.updateMd5(user, md5);
+      this.usersService.updateTelegramProfile(user, {
+        firstName,
+        secondName,
+        username,
+        md5,
+      });
     }
 
     if (user.isBlocked) {
