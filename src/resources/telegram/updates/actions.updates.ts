@@ -213,7 +213,7 @@ export class ActionsUpdate {
 
       await ctx.editMessageText(
         getTextByLanguageCode(languageCode, 'menu_book', {
-          id: `${id}`,
+          id: `\`${id}\``,
           title,
           author,
           currentPage: `${currentPage}`,
@@ -228,6 +228,7 @@ export class ActionsUpdate {
               `${appUrl}/r/${id}/${currentPage}?k=${apiKey}`,
             ),
           },
+          parse_mode: 'Markdown',
         },
       );
     } catch (error) {
