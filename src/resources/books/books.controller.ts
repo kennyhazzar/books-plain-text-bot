@@ -38,7 +38,7 @@ export class BooksController {
     if (apiKey) {
       const { appUrl: url } = this.configService.get<CommonConfigs>('common');
       return {
-        url,
+        url: `${url}/menu?k=${apiKey}`,
       };
     } else {
       const { url } = this.configService.get<TelegrafConfigs>('tg');
