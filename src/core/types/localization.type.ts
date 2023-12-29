@@ -40,7 +40,8 @@ export type Target =
   | 'book_menu_read_web'
   | 'book_menu_delete'
   | 'book_menu_download'
-  | 'menu_particle';
+  | 'menu_particle'
+  | 'set_chunk';
 
 export type LanguageCode = 'ru' | 'en' | string;
 

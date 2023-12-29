@@ -206,4 +206,9 @@ export const texts: Localization[] = [
     ru: 'Меню',
     en: 'Menu',
   },
+  {
+    target: 'set_chunk',
+    ru: 'Вы можете изменить размер страницы (чанка).\nВнимание: Уже созданные книги не будут изменены. Данный функционал в разработке.\nТекущий выбор отмечен точками',
+    en: 'You can change the page (chunk) size.\nNote: Already created books will not be changed. This functionality is under development.\nThe current selection is marked with dots',
+  },
 ];

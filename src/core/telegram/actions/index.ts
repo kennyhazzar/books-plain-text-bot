@@ -2,6 +2,7 @@ export enum Actions {
   PAGE = 'page_',
   CLOSE_BOOK = 'close_book',
   SET_LANGUAGE = 'set_language_',
+  SET_CHUNK = 'set_chunk_',
   MENU_BOOK = 'menu_book_',
   MENU_PAGE = 'menu_page_',
   BOOK_MENU_READ_CHAT = 'book_menu_read_chat_',

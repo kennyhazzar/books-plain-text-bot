@@ -21,6 +21,7 @@ import {
   Actions,
   languageMenu,
   getBooksKeyboard,
+  getChunkSettingsKeyboard,
 } from '@core/telegram';
 import * as generateMd5 from 'md5';
 
@@ -50,6 +51,21 @@ export class MainUpdate {
     }
 
     await next();
+  }
+
+  @Command('chunk')
+  async setChunk(ctx: MainUpdateContext) {
+    const languageCode = ctx.state.user.languageCode;
+
+    try {
+      ctx.reply(getTextByLanguageCode(languageCode, 'set_chunk'), {
+        reply_markup: {
+          inline_keyboard: getChunkSettingsKeyboard(ctx.state.user.chunkSize),
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Command('menu')

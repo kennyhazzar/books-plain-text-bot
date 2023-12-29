@@ -64,6 +64,15 @@ export class UsersService {
     return apiKey;
   }
 
+  public async updateChunkSize(user: User, chunkSize: number): Promise<void> {
+    const updatedUser = await this.userRepository.save({
+      ...user,
+      chunkSize,
+    });
+
+    await this.cacheManager.set(`book_user_${user.telegramId}`, updatedUser);
+  }
+
   public async getByTelegramId(telegramId: number): Promise<User> {
     const cacheKey = `book_user_${telegramId}`;
 

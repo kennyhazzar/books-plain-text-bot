@@ -5,6 +5,7 @@ import { CommonConfigs, MainUpdateContext } from '@core/types';
 import { GetChunkDto } from '../../books/dto';
 import {
   getBooksKeyboard,
+  getChunkSettingsKeyboard,
   getOneBookMenuKeyboard,
   getReadBookKeyboard,
   languageInlineKeyboard,
@@ -25,6 +26,35 @@ export class ActionsUpdate {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
   ) {}
+
+  @Action(/set_chunk_+/)
+  async updateChunk(ctx: MainUpdateContext) {
+    try {
+      const languageCode = ctx.state.user.languageCode;
+      const { callback_query: callbackQuery } =
+        ctx.update as TelegrafUpdate.CallbackQueryUpdate;
+
+      const [, chunkSize] = (callbackQuery as any).data.split('chunk_');
+
+      if (+chunkSize === ctx.state.user.chunkSize) {
+        ctx.answerCbQuery(
+          getTextByLanguageCode(languageCode, 'no_changes_detected'),
+        );
+
+        return;
+      }
+
+      this.usersService.updateChunkSize(ctx.state.user, +chunkSize);
+
+      ctx.editMessageText(getTextByLanguageCode(languageCode, 'set_chunk'), {
+        reply_markup: {
+          inline_keyboard: getChunkSettingsKeyboard(+chunkSize),
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   @Action(/book_menu_download_+/)
   async downloadBook(ctx: MainUpdateContext) {
