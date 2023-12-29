@@ -3,8 +3,8 @@ import { Localization } from '../types';
 export const texts: Localization[] = [
   {
     target: 'start',
-    ru: 'Используйте команду /link для получения ссылки на список ваших книг.\nОтправьте мне книгу в txt формате, и я выдам вам ссылку на книгу. Удалить книгу можно с помощью команды /delete, вызовите эту команду для получения информации\n\nВы также можете читать книги в чате бота! Используйте команду /read для получения информации',
-    en: 'Use the /link command to get a link to a list of your books.\nSend me a book in txt format and I will give you a link to the book. You can delete a book using the /delete command, call this command to get information\n\nYou can also read books in the bot chat! Use the /read command to get information',
+    ru: 'Приветствуем тебя в боте-читалке книг в формате plain text!\n\nВ скором времени будет доступна возможность загружать книги в формате fb2, но пока что бот принимает только книги в формате txt.\n\nПо умолчанию книга разбивается на чанки по 4096 символов, но вы можете изменить эти настройки.\n\n\nОзнакомьтесь со списком команд по кнопке Меню\n\nЕсли у вас есть пожелания, вы можете написать мне @kennyhazzar',
+    en: 'Welcome to the bot that reads books in plain text format!\n\nSoon it will be possible to download books in fb2 format, but for now the bot only accepts books in txt format.\n\nBy default, the book is divided into chunks of 4096 characters , but you can change these settings.\n\n\nCheck out the list of commands using the Menu button\n\nIf you have any suggestions, you can write to me @kennyhazzar',
   },
   {
     target: 'language',
