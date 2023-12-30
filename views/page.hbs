@@ -32,4 +32,15 @@
       color: white;
     }
   </style>
+
+  <script>
+    document.body.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowRight') {
+        window.location.replace('{{ next }}'.replace(/&#x3D;/g, '='));
+      }
+      if (event.key === 'ArrowLeft') {
+        window.location.replace('{{ back }}'.replace(/&#x3D;/g, '='));
+      }
+    });
+  </script>
 </html>
