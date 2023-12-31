@@ -34,8 +34,8 @@ export const getReadBookKeyboard = (
     ],
     [
       {
-        text: getTextByLanguageCode(languageCode, 'close'),
-        callback_data: Actions.CLOSE_BOOK,
+        text: getTextByLanguageCode(languageCode, 'book_menu_label'),
+        callback_data: `${Actions.MENU_BOOK}${bookId}`,
       },
     ],
     [

@@ -216,4 +216,9 @@ export const texts: Localization[] = [
     ru: 'Открыть в книге',
     en: 'Open in book',
   },
+  {
+    target: 'book_menu_label',
+    ru: 'Меню книги',
+    en: "Book's menu",
+  },
 ];

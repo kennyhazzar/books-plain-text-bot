@@ -41,6 +41,7 @@ export type Target =
   | 'book_menu_read_web'
   | 'book_menu_delete'
   | 'book_menu_download'
+  | 'book_menu_label'
   | 'menu_particle'
   | 'set_chunk';
 
