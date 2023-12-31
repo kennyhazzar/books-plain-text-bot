@@ -7,6 +7,7 @@ export type Target =
   | 'search_empty_result'
   | 'page_index'
   | 'search_result'
+  | 'search_open_in_book'
   | 'book_id_parse_error'
   | 'read'
   | 'download'

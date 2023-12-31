@@ -276,6 +276,8 @@ export class ActionsUpdate {
 
   @Action(/demo_page_+/)
   async getDemoPage(ctx: MainUpdateContext) {
+    const languageCode = ctx.state.user.languageCode;
+
     const { callback_query: callbackQuery } =
       ctx.update as TelegrafUpdate.CallbackQueryUpdate;
 
@@ -289,9 +291,12 @@ export class ActionsUpdate {
     );
 
     if (!chunk) {
-      ctx.answerCbQuery('Ошибка! Этой страницы или книги не существует!', {
-        show_alert: true,
-      });
+      ctx.answerCbQuery(
+        getTextByLanguageCode(languageCode, 'error_page_not_found'),
+        {
+          show_alert: true,
+        },
+      );
 
       return;
     }
@@ -301,11 +306,11 @@ export class ActionsUpdate {
         inline_keyboard: [
           [
             {
-              text: 'Открыть в книге',
+              text: getTextByLanguageCode(languageCode, 'search_open_in_book'),
               callback_data: `${Actions.PAGE}${bookId}_${page}`,
             },
             {
-              text: 'Закрыть',
+              text: getTextByLanguageCode(languageCode, 'close'),
               callback_data: Actions.CLOSE_BOOK,
             },
           ],
