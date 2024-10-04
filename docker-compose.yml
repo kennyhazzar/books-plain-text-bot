@@ -19,7 +19,6 @@ services:
     depends_on:
       - db
       - redis
-      - minio
   db:
       image: postgres:latest
       environment:
